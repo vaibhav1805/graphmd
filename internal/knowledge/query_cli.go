@@ -36,13 +36,14 @@ type QueryEnvelopeParams struct {
 
 // QueryEnvelopeMetadata contains graph-level metadata for the response.
 type QueryEnvelopeMetadata struct {
-	ExecutionTimeMs int64  `json:"execution_time_ms"`
-	NodeCount       int    `json:"node_count"`
-	EdgeCount       int    `json:"edge_count"`
-	GraphName       string `json:"graph_name"`
-	GraphVersion    string `json:"graph_version"`
-	CreatedAt       string `json:"created_at"`
-	ComponentCount  int    `json:"component_count"`
+	ExecutionTimeMs int64        `json:"execution_time_ms"`
+	NodeCount       int          `json:"node_count"`
+	EdgeCount       int          `json:"edge_count"`
+	GraphName       string       `json:"graph_name"`
+	GraphVersion    string       `json:"graph_version"`
+	CreatedAt       string       `json:"created_at"`
+	ComponentCount  int          `json:"component_count"`
+	CyclesDetected  []CycleEntry `json:"cycles_detected,omitempty"`
 }
 
 // EnrichedRelationship extends edge data with a human-readable confidence tier.
@@ -112,6 +113,16 @@ type ImpactNode struct {
 	Type           string `json:"type"`
 	Distance       int    `json:"distance"`
 	ConfidenceTier string `json:"confidence_tier"`
+}
+
+// --- Cycle detection types ---------------------------------------------------
+
+// CycleEntry records a back-edge detected during BFS traversal, indicating
+// a cycle in the dependency graph. From is the node being visited, To is the
+// already-visited neighbor that creates the cycle.
+type CycleEntry struct {
+	From string `json:"from"`
+	To   string `json:"to"`
 }
 
 // --- Error JSON type ---------------------------------------------------------
@@ -192,7 +203,7 @@ func cmdQueryImpact(args []string) error {
 	}
 
 	// Impact = reverse traversal: follow ByTarget to find things that depend on this component.
-	affectedNodes, relationships := executeImpactReverse(g, *component, depth, minConf)
+	affectedNodes, relationships, cycles := executeImpactReverse(g, *component, depth, minConf)
 
 	elapsed := time.Since(start).Milliseconds()
 
@@ -206,6 +217,9 @@ func cmdQueryImpact(args []string) error {
 		confParam = *minConf
 	}
 
+	md := buildMetadata(g, meta, *graphName, elapsed)
+	md.CyclesDetected = cycles
+
 	envelope := QueryEnvelope{
 		Query: QueryEnvelopeParams{
 			Type:          "impact",
@@ -214,7 +228,7 @@ func cmdQueryImpact(args []string) error {
 			MinConfidence: confParam,
 		},
 		Results:  result,
-		Metadata: buildMetadata(g, meta, *graphName, elapsed),
+		Metadata: md,
 	}
 
 	return outputEnvelope(envelope, *format, "impact")
@@ -261,7 +275,7 @@ func cmdQueryDependencies(args []string) error {
 	}
 
 	// Dependencies = forward traversal: follow BySource to find what this component depends on.
-	affectedNodes, relationships := executeForwardTraversal(g, *component, depth, minConf)
+	affectedNodes, relationships, cycles := executeForwardTraversal(g, *component, depth, minConf)
 
 	elapsed := time.Since(start).Milliseconds()
 
@@ -275,6 +289,9 @@ func cmdQueryDependencies(args []string) error {
 		confParam = *minConf
 	}
 
+	md := buildMetadata(g, meta, *graphName, elapsed)
+	md.CyclesDetected = cycles
+
 	envelope := QueryEnvelope{
 		Query: QueryEnvelopeParams{
 			Type:          "dependencies",
@@ -283,7 +300,7 @@ func cmdQueryDependencies(args []string) error {
 			MinConfidence: confParam,
 		},
 		Results:  result,
-		Metadata: buildMetadata(g, meta, *graphName, elapsed),
+		Metadata: md,
 	}
 
 	return outputEnvelope(envelope, *format, "dependencies")
@@ -493,7 +510,7 @@ func cmdQueryList(args []string) error {
 
 // executeImpactReverse performs BFS following ByTarget (incoming edges) to find
 // components that depend on root. This answers "if root fails, what breaks?"
-func executeImpactReverse(g *Graph, root string, maxDepth int, minConf *float64) ([]ImpactNode, []EnrichedRelationship) {
+func executeImpactReverse(g *Graph, root string, maxDepth int, minConf *float64) ([]ImpactNode, []EnrichedRelationship, []CycleEntry) {
 	type entry struct {
 		id    string
 		depth int
@@ -557,14 +574,18 @@ func executeImpactReverse(g *Graph, root string, maxDepth int, minConf *float64)
 	if rels == nil {
 		rels = []EnrichedRelationship{}
 	}
-	return nodes, rels
+
+	// Detect cycles in the full graph and filter to those involving traversed nodes.
+	cycles := detectRelevantCycles(g, visited, root)
+
+	return nodes, rels, cycles
 }
 
 // --- Forward traversal for dependencies queries ------------------------------
 
 // executeForwardTraversal performs BFS following BySource (outgoing edges) to find
 // what root depends on. This answers "what does root need to work?"
-func executeForwardTraversal(g *Graph, root string, maxDepth int, minConf *float64) ([]ImpactNode, []EnrichedRelationship) {
+func executeForwardTraversal(g *Graph, root string, maxDepth int, minConf *float64) ([]ImpactNode, []EnrichedRelationship, []CycleEntry) {
 	type entry struct {
 		id    string
 		depth int
@@ -628,7 +649,58 @@ func executeForwardTraversal(g *Graph, root string, maxDepth int, minConf *float
 	if rels == nil {
 		rels = []EnrichedRelationship{}
 	}
-	return nodes, rels
+
+	// Detect cycles in the full graph and filter to those involving traversed nodes.
+	cycles := detectRelevantCycles(g, visited, root)
+
+	return nodes, rels, cycles
+}
+
+// --- Cycle detection for query results ---------------------------------------
+
+// detectRelevantCycles uses the graph's DFS-based cycle detection and filters
+// results to only include cycles where at least one non-root participant was
+// reached by the BFS traversal. Each cycle edge is reported as a CycleEntry.
+// The root node is excluded from cycle entries to avoid false positives.
+func detectRelevantCycles(g *Graph, visited map[string]bool, _ string) []CycleEntry {
+	allCycles := g.DetectCycles()
+	if len(allCycles) == 0 {
+		return nil
+	}
+
+	var entries []CycleEntry
+	seen := make(map[[2]string]bool)
+
+	for _, cycle := range allCycles {
+		// cycle is [A, B, ..., A] (first == last).
+		// Include this cycle only if at least one participant was reached by BFS.
+		hasVisited := false
+		for _, nodeID := range cycle[:len(cycle)-1] {
+			if visited[nodeID] {
+				hasVisited = true
+				break
+			}
+		}
+		if !hasVisited {
+			continue
+		}
+
+		// Emit each edge in the cycle.
+		for i := 0; i < len(cycle)-1; i++ {
+			from := cycle[i]
+			to := cycle[i+1]
+			if from == to {
+				continue // skip degenerate self-loop from reconstruction
+			}
+			key := [2]string{from, to}
+			if !seen[key] {
+				seen[key] = true
+				entries = append(entries, CycleEntry{From: from, To: to})
+			}
+		}
+	}
+
+	return entries
 }
 
 // --- Fuzzy component matching ------------------------------------------------

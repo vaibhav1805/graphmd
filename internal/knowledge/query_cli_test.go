@@ -534,3 +534,220 @@ func TestSuggestComponents(t *testing.T) {
 		}
 	}
 }
+
+// --- Cycle detection tests ---------------------------------------------------
+
+// setupCyclicQueryTestGraph creates a graph identical to setupQueryTestGraph but
+// adds an edge from primary-db back to payment-api, creating a cycle:
+//
+//	payment-api -> primary-db -> payment-api
+func setupCyclicQueryTestGraph(t *testing.T) {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	xdgDir := filepath.Join(tmpDir, "xdg")
+	t.Setenv("XDG_DATA_HOME", xdgDir)
+
+	buildDir := filepath.Join(tmpDir, "build")
+	os.MkdirAll(buildDir, 0o755)
+
+	g := NewGraph()
+	_ = g.AddNode(&Node{ID: "payment-api", Title: "Payment API", Type: "document", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "primary-db", Title: "Primary DB", Type: "document", ComponentType: ComponentTypeDatabase})
+	_ = g.AddNode(&Node{ID: "redis-cache", Title: "Redis Cache", Type: "document", ComponentType: ComponentTypeCache})
+	_ = g.AddNode(&Node{ID: "auth-service", Title: "Auth Service", Type: "document", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "web-frontend", Title: "Web Frontend", Type: "document", ComponentType: ComponentTypeService})
+
+	edges := []*Edge{
+		{ID: "payment-api->primary-db", Source: "payment-api", Target: "primary-db", Type: EdgeDependsOn, Confidence: 0.95, SourceFile: "payment-api.md", ExtractionMethod: "explicit-link"},
+		{ID: "payment-api->redis-cache", Source: "payment-api", Target: "redis-cache", Type: EdgeDependsOn, Confidence: 0.85, SourceFile: "payment-api.md", ExtractionMethod: "co-occurrence"},
+		{ID: "auth-service->primary-db", Source: "auth-service", Target: "primary-db", Type: EdgeDependsOn, Confidence: 0.90, SourceFile: "auth-service.md", ExtractionMethod: "structural"},
+		{ID: "auth-service->payment-api", Source: "auth-service", Target: "payment-api", Type: EdgeDependsOn, Confidence: 0.70, SourceFile: "auth-service.md", ExtractionMethod: "semantic"},
+		{ID: "web-frontend->auth-service", Source: "web-frontend", Target: "auth-service", Type: EdgeDependsOn, Confidence: 0.80, SourceFile: "web-frontend.md", ExtractionMethod: "explicit-link"},
+		{ID: "web-frontend->payment-api", Source: "web-frontend", Target: "payment-api", Type: EdgeDependsOn, Confidence: 0.75, SourceFile: "web-frontend.md", ExtractionMethod: "co-occurrence"},
+		// Cycle edge: primary-db depends on payment-api (creates payment-api -> primary-db -> payment-api cycle)
+		{ID: "primary-db->payment-api", Source: "primary-db", Target: "payment-api", Type: EdgeDependsOn, Confidence: 0.60, SourceFile: "primary-db.md", ExtractionMethod: "structural"},
+	}
+	for _, e := range edges {
+		_ = g.AddEdge(e)
+	}
+
+	// Save to SQLite.
+	dbPath := filepath.Join(buildDir, "graph.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	if err := db.SaveGraph(g); err != nil {
+		t.Fatalf("save graph: %v", err)
+	}
+	db.Close()
+
+	// Create metadata.
+	meta := ExportMetadata{
+		Version:           "1.0.0",
+		SchemaVersion:     SchemaVersion,
+		CreatedAt:         "2026-03-29T00:00:00Z",
+		ComponentCount:    5,
+		RelationshipCount: 7,
+		InputPath:         "/test",
+	}
+	metaJSON, _ := json.MarshalIndent(meta, "", "  ")
+
+	// Package as ZIP.
+	zipPath := filepath.Join(buildDir, "cyclic-test.zip")
+	zf, _ := os.Create(zipPath)
+	zw := zip.NewWriter(zf)
+	dbData, _ := os.ReadFile(dbPath)
+	w, _ := zw.Create("graph.db")
+	w.Write(dbData)
+	w, _ = zw.Create("metadata.json")
+	w.Write(metaJSON)
+	zw.Close()
+	zf.Close()
+
+	// Import.
+	if err := ImportZIP(zipPath, "cyclic-test"); err != nil {
+		t.Fatalf("ImportZIP: %v", err)
+	}
+}
+
+func TestQueryImpact_CyclicGraph_DetectsCycles(t *testing.T) {
+	setupCyclicQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--depth", "all", "--graph", "cyclic-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	// metadata.cycles_detected must be non-empty.
+	if len(env.Metadata.CyclesDetected) == 0 {
+		t.Fatal("expected cycles_detected to be non-empty for cyclic graph")
+	}
+
+	// Check that the cycle entry has correct from/to fields.
+	foundCycle := false
+	for _, c := range env.Metadata.CyclesDetected {
+		if c.From != "" && c.To != "" {
+			foundCycle = true
+		}
+	}
+	if !foundCycle {
+		t.Error("expected cycle entry with non-empty from/to fields")
+	}
+}
+
+func TestQueryDependencies_CyclicGraph_DetectsCycles(t *testing.T) {
+	setupCyclicQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"dependencies", "--component", "payment-api", "--depth", "all", "--graph", "cyclic-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery dependencies: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	// metadata.cycles_detected must be non-empty.
+	if len(env.Metadata.CyclesDetected) == 0 {
+		t.Fatal("expected cycles_detected to be non-empty for cyclic graph (dependencies)")
+	}
+}
+
+func TestQueryImpact_AcyclicGraph_NoCycles(t *testing.T) {
+	setupQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--depth", "all", "--graph", "query-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	// cycles_detected must be nil/absent for acyclic graph.
+	if len(env.Metadata.CyclesDetected) != 0 {
+		t.Errorf("expected no cycles_detected for acyclic graph, got %d", len(env.Metadata.CyclesDetected))
+	}
+}
+
+func TestQueryImpact_CyclicGraph_CorrectBFSDistances(t *testing.T) {
+	setupCyclicQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--depth", "all", "--graph", "cyclic-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	json.Unmarshal([]byte(output), &env)
+
+	resultsJSON, _ := json.Marshal(env.Results)
+	var result ImpactResult
+	json.Unmarshal(resultsJSON, &result)
+
+	// Verify BFS distances are correct despite cycle detection.
+	distMap := make(map[string]int)
+	for _, n := range result.AffectedNodes {
+		distMap[n.Name] = n.Distance
+	}
+
+	// payment-api depends on primary-db directly => distance 1
+	if d, ok := distMap["payment-api"]; !ok || d != 1 {
+		t.Errorf("expected payment-api at distance 1, got %d (ok=%v)", d, ok)
+	}
+	// auth-service depends on primary-db directly => distance 1
+	if d, ok := distMap["auth-service"]; !ok || d != 1 {
+		t.Errorf("expected auth-service at distance 1, got %d (ok=%v)", d, ok)
+	}
+}
+
+func TestQueryImpact_CyclicGraph_RootNotFalselyCycleParticipant(t *testing.T) {
+	// On the acyclic graph, root should not be falsely reported as a cycle participant.
+	setupQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--depth", "all", "--graph", "query-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	json.Unmarshal([]byte(output), &env)
+
+	// On acyclic graph, no cycles should be reported at all (root not falsely reported).
+	if len(env.Metadata.CyclesDetected) != 0 {
+		t.Errorf("root node should not be falsely reported as cycle participant on acyclic graph, got %d cycles", len(env.Metadata.CyclesDetected))
+	}
+}
+
+func TestQueryImpact_CyclicGraph_CyclesDetectedAbsentInJSON(t *testing.T) {
+	setupQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		CmdQuery([]string{"impact", "--component", "primary-db", "--depth", "all", "--graph", "query-test"})
+	})
+
+	// For acyclic graph, cycles_detected should be absent from JSON (omitempty).
+	if strings.Contains(output, "cycles_detected") {
+		t.Error("cycles_detected should be absent from JSON for acyclic graph (omitempty)")
+	}
+}

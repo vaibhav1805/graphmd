@@ -33,6 +33,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,6 +41,10 @@ import (
 
 	_ "modernc.org/sqlite" // register "sqlite" driver
 )
+
+// stderrWriter is the destination for warning messages (e.g., dropped edges).
+// Defaults to os.Stderr; tests override it with a bytes.Buffer to capture output.
+var stderrWriter io.Writer = os.Stderr
 
 // SchemaVersion is incremented each time the database schema changes.
 // Migrations run automatically in Migrate() when an older database is opened.
@@ -875,7 +880,10 @@ func (db *Database) LoadIndex(idx *Index) error {
 // SaveGraph serialises graph to the database, replacing any previously stored
 // graph data.  All changes are wrapped in a single transaction.
 func (db *Database) SaveGraph(graph *Graph) error {
-	return transaction(db.conn, func(tx *sql.Tx) error {
+	// Track edges dropped due to missing endpoint nodes.
+	var droppedPairs []string
+
+	err := transaction(db.conn, func(tx *sql.Tx) error {
 		// Clear old data (cascade deletes edges automatically).
 		if _, err := tx.Exec(`DELETE FROM graph_edges`); err != nil {
 			return fmt.Errorf("clear graph_edges: %w", err)
@@ -924,9 +932,13 @@ func (db *Database) SaveGraph(graph *Graph) error {
 				// Skip edges that reference non-existent nodes (dangling references
 				// from the extractor or discovery algorithms).
 				if _, ok := graph.Nodes[e.Source]; !ok {
+					droppedPairs = append(droppedPairs,
+						fmt.Sprintf("  %s -> %s (missing source %q)", e.Source, e.Target, e.Source))
 					continue
 				}
 				if _, ok := graph.Nodes[e.Target]; !ok {
+					droppedPairs = append(droppedPairs,
+						fmt.Sprintf("  %s -> %s (missing target %q)", e.Source, e.Target, e.Target))
 					continue
 				}
 				_, err := tx.Exec(
@@ -947,6 +959,17 @@ func (db *Database) SaveGraph(graph *Graph) error {
 
 		return nil
 	})
+
+	// Print dropped-edge warnings to stderr after successful transaction.
+	if err == nil && len(droppedPairs) > 0 {
+		w := stderrWriter
+		fmt.Fprintf(w, "  Warning: %d edge(s) dropped (missing endpoint nodes)\n", len(droppedPairs))
+		for _, pair := range droppedPairs {
+			fmt.Fprintf(w, "%s\n", pair)
+		}
+	}
+
+	return err
 }
 
 // LoadGraph reconstructs graph from the database.
