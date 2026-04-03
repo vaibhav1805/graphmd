@@ -142,14 +142,15 @@
 4. **Machine-readable output:** All query results are valid JSON (parseable by `jq .`) with consistent schema: `{components: [...], relationships: [...], metadata: {...}}`.
 5. **Provenance in results:** Each relationship in query output includes `source_file`, `extraction_method`, and `confidence` fields.
 
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 ### Plans
 
 | # | Plan | Status |
 |---|------|--------|
-| 1 | Import pipeline: ZIP extraction, XDG storage, named graphs, schema validation | Not started |
-| 2 | Query router: impact, dependencies, path, list subcommands with JSON envelope | Not started |
+| 1 | Import pipeline: ZIP extraction, XDG storage, named graphs, schema validation | Complete (2026-03-23) |
+| 2 | Query router: impact, dependencies, path, list subcommands with JSON envelope | Complete (2026-03-23) |
+| 3 | Gap closure: Wire graph_name through query metadata envelope | Not started |
 
 ---
 
@@ -172,11 +173,14 @@
 2. **Confidence distribution:** Output includes confidence tier breakdown (e.g., "explicit: 15, strong: 23, moderate: 8, weak: 3") so engineers can assess graph quality.
 3. **Fast feedback:** Crawl completes on a 100-document corpus in under 10 seconds.
 
+**Plans:** 2 plans
+
 ### Plans
 
-1. Extend crawl command to build in-memory graph with component types
-2. Add confidence distribution calculator and display
-3. Add summary statistics output (counts by type, relationship quality metrics)
+| # | Plan | Status |
+|---|------|--------|
+| 1 | Crawl stats engine (TDD): confidence distribution, quality score, quality warnings | Not started |
+| 2 | CmdCrawl command wiring, text/JSON formatters, main.go integration | Not started |
 
 ---
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -180,6 +181,21 @@ func cmdIndex() {
 }
 
 func cmdCrawl() {
+	err := knowledge.CmdCrawl(os.Args[2:])
+	if err == nil {
+		return
+	}
+	if errors.Is(err, knowledge.ErrLegacyCrawl) {
+		// Fall through to existing targeted traversal logic.
+		cmdCrawlLegacy()
+		return
+	}
+	fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	os.Exit(1)
+}
+
+// cmdCrawlLegacy implements the original --from-multiple targeted traversal mode.
+func cmdCrawlLegacy() {
 	fs := flag.NewFlagSet("crawl", flag.ExitOnError)
 	fromMultiple := fs.String("from-multiple", "", "Comma-separated starting files")
 	dir := fs.String("dir", ".", "Directory that was indexed")

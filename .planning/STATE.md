@@ -1,8 +1,8 @@
 # Project State: graphmd v1
 
-**Last updated:** 2026-03-23
-**Current phase:** Phase 4 - Import & Query Pipeline (2/3 plans complete)
-**Status:** In progress
+**Last updated:** 2026-03-24
+**Current phase:** Phase 5 - Crawl Exploration (2/2 plans complete)
+**Status:** Complete
 
 ## Phase Progress
 
@@ -11,24 +11,24 @@
 | 1 | Component Model | Complete (3/3 plans) | COMP-01, COMP-02, COMP-03 | 3/3 |
 | 2 | Accuracy Foundation | Complete (5/5 plans) | REL-01, REL-02, REL-03, REL-04, REL-05 | 5/5 |
 | 3 | Extract & Export Pipeline | Complete (2/2 plans) | EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02 | 2/2 |
-| 4 | Import & Query Pipeline | In progress (2/3 plans) | IMPORT-01, IMPORT-02, IMPORT-03 | 2/3 |
-| 5 | Crawl Exploration | Not started | CRAWL-01, CRAWL-02 | 0/2 |
+| 4 | Import & Query Pipeline | Complete (3/3 plans) | IMPORT-01, IMPORT-02, IMPORT-03 | 3/3 |
+| 5 | Crawl Exploration | Complete (2/2 plans) | CRAWL-01, CRAWL-02 | 2/2 |
 
 ## Overall Progress
 
 - **Total requirements:** 18
-- **Completed:** 16 (COMP-01, COMP-02, COMP-03, REL-05, REL-01, REL-02, REL-03, REL-04, EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02, IMPORT-01, IMPORT-02, IMPORT-03)
+- **Completed:** 18 (COMP-01, COMP-02, COMP-03, REL-05, REL-01, REL-02, REL-03, REL-04, EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02, IMPORT-01, IMPORT-02, IMPORT-03, CRAWL-01, CRAWL-02)
 - **In progress:** 0
-- **Not started:** 2
-- **Completion:** 89%
+- **Not started:** 0
+- **Completion:** 100%
 
 ## Current Focus
 
-Phase 4 in progress (2/3 plans). Query CLI delivers the core product: impact, dependencies, path, and list queries.
+All 5 phases complete. Project v1 milestone finished.
 
 ### Next Actions
 
-1. Phase 4, Plan 3: Integration tests and end-to-end validation
+None - all plans complete.
 
 ## Decisions Log
 
@@ -67,6 +67,12 @@ Phase 4 in progress (2/3 plans). Query CLI delivers the core product: impact, de
 | 2026-03-23 | Impact uses reverse BFS (ByTarget) for correct "what breaks?" semantics | Forward traversal would answer "what does X depend on?" which is dependencies, not impact |
 | 2026-03-23 | No-path-found returns exit 0 with reason field | Empty results are valid outcomes, not errors |
 | 2026-03-23 | Word-level overlap scoring in fuzzy component matching | Better suggestions when query shares word parts with component names |
+| 2026-03-23 | graphName passed as explicit parameter to buildMetadata | Keeps function pure and testable rather than looking up internally |
+| 2026-03-24 | Tier bounds derived from ScoreToTier thresholds (not hardcoded) | Stays in sync with confidence.go automatically |
+| 2026-03-24 | Weak-only threshold at 0.55 (moderate tier boundary) | Consistent with ScoreToTier tier boundaries |
+| 2026-03-24 | ErrLegacyCrawl sentinel error for backward-compatible --from-multiple fallback | Clean delegation pattern without breaking existing crawl mode |
+| 2026-03-24 | Text format as default for crawl command (not JSON) | Crawl is a human-facing diagnostic tool |
+| 2026-03-24 | ASCII bar chart scaled to max count with 30-char max width | Readable confidence distribution visualization |
 
 ## Blockers
 
@@ -98,7 +104,10 @@ None.
 | 03-02 | Export Pipeline | 5 min | 2 | 4 |
 | 04-01 | Import Pipeline | 3 min | 2 | 4 |
 | 04-02 | Query CLI | 5 min | 2 | 3 |
+| 04-03 | Graph Name Gap Closure | 1 min | 1 | 2 |
+| 05-01 | Crawl Stats Engine | 2 min | 2 | 2 |
+| 05-02 | Crawl CLI Command | 3 min | 2 | 3 |
 
 ---
 *Initialized: 2026-03-16*
-*Last plan completed: 04-02 Query CLI (2026-03-23)*
+*Last plan completed: 05-02 Crawl CLI Command (2026-03-24)*

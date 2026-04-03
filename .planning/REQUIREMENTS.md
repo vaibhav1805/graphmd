@@ -41,8 +41,8 @@ Dependency graph export/import pipeline with accurate relationship inference fro
 
 ### Local Exploration
 
-- [ ] **CRAWL-01**: Implement `crawl` command for local graph exploration (build in-memory graph, display stats)
-- [ ] **CRAWL-02**: Display relationship confidence distribution and summary statistics
+- [x] **CRAWL-01**: Implement `crawl` command for local graph exploration (build in-memory graph, display stats)
+- [x] **CRAWL-02**: Display relationship confidence distribution and summary statistics
 
 ## v2 Requirements
 
