@@ -1,0 +1,56 @@
+{
+  "file": "/Users/flurryhead/Developer/Opensource/bmd/test-data/singlerepo-unreferenced-docs/analytics-tracking.md",
+  "root": {
+    "heading": "",
+    "summary": "",
+    "content": "# Analytics and Tracking\n\n## Overview\n\nCollects and processes user behavior analytics.\n\n## Events Tracked\n\n- User login/logout\n- Page views\n- Button clicks\n- Search queries\n- Purchase events\n\n## Data Processing\n\nEvents are collected in a message queue and processed asynchronously.\n\n## Retention Policy\n\n- Raw events: 90 days\n- Aggregated metrics: 2 years\n- User identifiers: 30 days post-deletion\n\n## Privacy\n\n- PII is encrypted at rest\n- Access requires authentication\n- Audit logs track all queries\n",
+    "line_start": 0,
+    "line_end": 29,
+    "children": [
+      {
+        "heading": "Analytics and Tracking",
+        "summary": "# Analytics and Tracking\n\n## Overview\n\nCollects and processes user behavior analytics.\n\n## Events Tr",
+        "content": "# Analytics and Tracking\n\n## Overview\n\nCollects and processes user behavior analytics.\n\n## Events Tracked\n\n- User login/logout\n- Page views\n- Button clicks\n- Search queries\n- Purchase events\n\n## Data Processing\n\nEvents are collected in a message queue and processed asynchronously.\n\n## Retention Policy\n\n- Raw events: 90 days\n- Aggregated metrics: 2 years\n- User identifiers: 30 days post-deletion\n\n## Privacy\n\n- PII is encrypted at rest\n- Access requires authentication\n- Audit logs track all queries",
+        "line_start": 0,
+        "line_end": 29,
+        "children": [
+          {
+            "heading": "Overview",
+            "summary": "## Overview\n\nCollects and processes user behavior analytics.",
+            "content": "## Overview\n\nCollects and processes user behavior analytics.",
+            "line_start": 2,
+            "line_end": 5
+          },
+          {
+            "heading": "Events Tracked",
+            "summary": "## Events Tracked\n\n- User login/logout\n- Page views\n- Button clicks\n- Search queries\n- Purchase even",
+            "content": "## Events Tracked\n\n- User login/logout\n- Page views\n- Button clicks\n- Search queries\n- Purchase events",
+            "line_start": 6,
+            "line_end": 13
+          },
+          {
+            "heading": "Data Processing",
+            "summary": "## Data Processing\n\nEvents are collected in a message queue and processed asynchronously.",
+            "content": "## Data Processing\n\nEvents are collected in a message queue and processed asynchronously.",
+            "line_start": 14,
+            "line_end": 17
+          },
+          {
+            "heading": "Retention Policy",
+            "summary": "## Retention Policy\n\n- Raw events: 90 days\n- Aggregated metrics: 2 years\n- User identifiers: 30 days",
+            "content": "## Retention Policy\n\n- Raw events: 90 days\n- Aggregated metrics: 2 years\n- User identifiers: 30 days post-deletion",
+            "line_start": 18,
+            "line_end": 23
+          },
+          {
+            "heading": "Privacy",
+            "summary": "## Privacy\n\n- PII is encrypted at rest\n- Access requires authentication\n- Audit logs track all queri",
+            "content": "## Privacy\n\n- PII is encrypted at rest\n- Access requires authentication\n- Audit logs track all queries",
+            "line_start": 24,
+            "line_end": 29
+          }
+        ]
+      }
+    ]
+  }
+}

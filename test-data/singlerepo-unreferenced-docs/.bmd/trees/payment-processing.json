@@ -1,0 +1,56 @@
+{
+  "file": "/Users/flurryhead/Developer/Opensource/bmd/test-data/singlerepo-unreferenced-docs/payment-processing.md",
+  "root": {
+    "heading": "",
+    "summary": "",
+    "content": "# Payment Processing Module\n\n## Overview\n\nHandles all payment transactions and billing operations.\n\n## Transaction Flow\n\n1. Customer initiates payment\n2. Amount is validated\n3. Payment gateway processes transaction\n4. Receipt is generated\n5. Confirmation email sent\n\n## Supported Payment Methods\n\n- Credit cards (Visa, Mastercard, Amex)\n- Debit cards\n- Bank transfers\n- Digital wallets\n\n## Error Handling\n\nPayment failures are logged and user is notified via email.\n\n## Compliance\n\n- PCI DSS Level 1 compliant\n- GDPR data retention policies applied\n",
+    "line_start": 0,
+    "line_end": 29,
+    "children": [
+      {
+        "heading": "Payment Processing Module",
+        "summary": "# Payment Processing Module\n\n## Overview\n\nHandles all payment transactions and billing operations.\n\n",
+        "content": "# Payment Processing Module\n\n## Overview\n\nHandles all payment transactions and billing operations.\n\n## Transaction Flow\n\n1. Customer initiates payment\n2. Amount is validated\n3. Payment gateway processes transaction\n4. Receipt is generated\n5. Confirmation email sent\n\n## Supported Payment Methods\n\n- Credit cards (Visa, Mastercard, Amex)\n- Debit cards\n- Bank transfers\n- Digital wallets\n\n## Error Handling\n\nPayment failures are logged and user is notified via email.\n\n## Compliance\n\n- PCI DSS Level 1 compliant\n- GDPR data retention policies applied",
+        "line_start": 0,
+        "line_end": 29,
+        "children": [
+          {
+            "heading": "Overview",
+            "summary": "## Overview\n\nHandles all payment transactions and billing operations.",
+            "content": "## Overview\n\nHandles all payment transactions and billing operations.",
+            "line_start": 2,
+            "line_end": 5
+          },
+          {
+            "heading": "Transaction Flow",
+            "summary": "## Transaction Flow\n\n1. Customer initiates payment\n2. Amount is validated\n3. Payment gateway process",
+            "content": "## Transaction Flow\n\n1. Customer initiates payment\n2. Amount is validated\n3. Payment gateway processes transaction\n4. Receipt is generated\n5. Confirmation email sent",
+            "line_start": 6,
+            "line_end": 13
+          },
+          {
+            "heading": "Supported Payment Methods",
+            "summary": "## Supported Payment Methods\n\n- Credit cards (Visa, Mastercard, Amex)\n- Debit cards\n- Bank transfers",
+            "content": "## Supported Payment Methods\n\n- Credit cards (Visa, Mastercard, Amex)\n- Debit cards\n- Bank transfers\n- Digital wallets",
+            "line_start": 14,
+            "line_end": 20
+          },
+          {
+            "heading": "Error Handling",
+            "summary": "## Error Handling\n\nPayment failures are logged and user is notified via email.",
+            "content": "## Error Handling\n\nPayment failures are logged and user is notified via email.",
+            "line_start": 21,
+            "line_end": 24
+          },
+          {
+            "heading": "Compliance",
+            "summary": "## Compliance\n\n- PCI DSS Level 1 compliant\n- GDPR data retention policies applied",
+            "content": "## Compliance\n\n- PCI DSS Level 1 compliant\n- GDPR data retention policies applied",
+            "line_start": 25,
+            "line_end": 29
+          }
+        ]
+      }
+    ]
+  }
+}

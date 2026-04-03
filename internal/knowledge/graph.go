@@ -20,6 +20,10 @@ type Node struct {
 	// Type describes what kind of entity the node represents.
 	// For documents loaded via the scanner the type is always "document".
 	Type string
+
+	// ComponentType classifies this node using the 12-type taxonomy
+	// (service, database, cache, etc.).  Defaults to "unknown".
+	ComponentType ComponentType
 }
 
 // Graph is a directed knowledge graph where nodes represent documents and edges

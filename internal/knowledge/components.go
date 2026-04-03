@@ -35,6 +35,19 @@ type Component struct {
 
 	// Endpoints holds the REST API endpoints discovered in the document.
 	Endpoints []Endpoint
+
+	// Type classifies this component using the 12-type taxonomy.
+	// Defaults to ComponentTypeUnknown when detection cannot determine a
+	// more specific classification.
+	Type ComponentType
+
+	// TypeConfidence is the confidence score for the type classification,
+	// in [0.4, 1.0].
+	TypeConfidence float64
+
+	// DetectionMethods lists the methods that contributed to detecting this
+	// component (e.g. "filename", "heading", "in-degree", "config").
+	DetectionMethods []string
 }
 
 // Endpoint describes a single REST API endpoint extracted from a markdown
@@ -151,11 +164,21 @@ func (cd *ComponentDetector) detectConfiguredComponents(graph *Graph, docByID ma
 	for _, entry := range cd.config.Components {
 		for id, node := range graph.Nodes {
 			if matchesPatterns(node.ID, node.Title, entry.Patterns) {
+				// Use configured type if available, otherwise infer.
+				ct := ComponentType(entry.Type)
+				typeConf := 1.0
+				if ct == "" || !IsValidComponentType(ct) {
+					ct, typeConf = InferComponentType(entry.ID, node.Title)
+				}
+
 				comp := Component{
-					ID:         entry.ID,
-					Name:       node.Title,
-					File:       id,
-					Confidence: ConfidenceConfigured,
+					ID:               entry.ID,
+					Name:             node.Title,
+					File:             id,
+					Confidence:       ConfidenceConfigured,
+					Type:             ct,
+					TypeConfidence:   typeConf,
+					DetectionMethods: []string{"config"},
 				}
 
 				// Extract endpoints if we have the document.
@@ -200,9 +223,10 @@ func (cd *ComponentDetector) detectAutoComponents(graph *Graph, docByID map[stri
 		if confidence <= 0 && inDegree[id] >= inDegreeThreshold {
 			confidence = ConfidenceHighInDegree
 			comp = Component{
-				ID:   nodeToComponentID(node.ID),
-				Name: node.Title,
-				File: id,
+				ID:               nodeToComponentID(node.ID),
+				Name:             node.Title,
+				File:             id,
+				DetectionMethods: []string{"in-degree"},
 			}
 		}
 
@@ -216,6 +240,11 @@ func (cd *ComponentDetector) detectAutoComponents(graph *Graph, docByID map[stri
 		}
 
 		comp.Confidence = confidence
+
+		// Infer component type if not already set.
+		if comp.Type == "" || comp.Type == ComponentTypeUnknown {
+			comp.Type, comp.TypeConfidence = InferComponentType(comp.ID, comp.Name, node.Title)
+		}
 
 		// Only store this component if we don't have one yet or this has higher confidence
 		if existing, ok := candidateMap[comp.ID]; !ok || confidence > existing.Confidence {
@@ -249,9 +278,10 @@ func (cd *ComponentDetector) IsComponent(node *Node) (Component, float64) {
 	// Examples: auth-component.md, auth-service/readme.md, payment-service/api.md
 	if strings.Contains(stemLower, "component") || strings.Contains(stemLower, "service") {
 		return Component{
-			ID:   nodeToComponentID(node.ID),
-			Name: node.Title,
-			File: node.ID,
+			ID:               nodeToComponentID(node.ID),
+			Name:             node.Title,
+			File:             node.ID,
+			DetectionMethods: []string{"filename"},
 		}, ConfidenceComponentFilename
 	}
 
@@ -260,9 +290,10 @@ func (cd *ComponentDetector) IsComponent(node *Node) (Component, float64) {
 	parts := strings.Split(strings.TrimPrefix(node.ID, "./"), string(filepath.Separator))
 	if len(parts) > 1 && strings.HasSuffix(parts[0], "-service") {
 		return Component{
-			ID:   strings.ToLower(parts[0]), // Use service dir name directly (e.g., "auth-service")
-			Name: node.Title,
-			File: node.ID,
+			ID:               strings.ToLower(parts[0]), // Use service dir name directly (e.g., "auth-service")
+			Name:             node.Title,
+			File:             node.ID,
+			DetectionMethods: []string{"filename"},
 		}, ConfidenceComponentFilename
 	}
 
@@ -270,9 +301,10 @@ func (cd *ComponentDetector) IsComponent(node *Node) (Component, float64) {
 	// Examples: "# User Component", "# Auth Service", "# Payment Service API"
 	if strings.Contains(lowerTitle, "component") || strings.Contains(lowerTitle, "service") {
 		return Component{
-			ID:   nodeToComponentID(node.ID),
-			Name: node.Title,
-			File: node.ID,
+			ID:               nodeToComponentID(node.ID),
+			Name:             node.Title,
+			File:             node.ID,
+			DetectionMethods: []string{"heading"},
 		}, ConfidenceComponentHeading
 	}
 

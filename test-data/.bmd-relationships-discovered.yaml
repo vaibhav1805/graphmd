@@ -1,0 +1,688 @@
+version: "1.0"
+generated: "2026-03-10T03:32:41Z"
+algorithm_versions:
+    cooccurrence: "1.0"
+    structural: "1.0"
+    semantic: "1.0"
+    ner: "1.0"
+relationships:
+    - source: api-gateway-service/README.md
+      target: user-service/api.md
+      type: depends-on
+      confidence: 0.85
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: API Gateway Service Overview Central request router and load balancer for all microservices. Routes incoming API requ...
+        - type: structural
+          value: 0.85
+          evidence: 'The API Gateway routes requests to:'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: deployment-service/README.md
+      target: user-service/api.md
+      type: depends-on
+      confidence: 0.85
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: 'Scaling policy automation Key Dependencies api-gateway-service: Service registration and discovery'
+        - type: structural
+          value: 0.85
+          evidence: '- **api-gateway-service**: Service registration and discovery'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: documentation-service/README.md
+      target: user-service/api.md
+      type: depends-on
+      confidence: 0.85
+      signals:
+        - type: mention
+          value: 0.8
+          evidence: '- Python SDK (via OpenAPI Generator)'
+        - type: structural
+          value: 0.85
+          evidence: '- **api-gateway-service**: Serves /api/docs endpoint'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: auth-service/README.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.8
+      signals:
+        - type: mention
+          value: 0.8
+          evidence: '- **api-gateway-service**: On every request for JWT validation'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: recommendation-service/README.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.8
+      signals:
+        - type: mention
+          value: 0.8
+          evidence: 'Services call recommendation-service via REST API:'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: sms-service/README.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.8
+      signals:
+        - type: mention
+          value: 0.8
+          evidence: Integrates with Twilio API. Webhooks from Twilio notify of delivery status changes.
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: user-service/README.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.8
+      signals:
+        - type: mention
+          value: 0.8
+          evidence: '- **api-gateway-service**: User profile endpoint'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: database-service/README.md
+      target: analytics-service/api.md
+      type: depends-on
+      confidence: 0.75
+      signals:
+        - type: structural
+          value: 0.75
+          evidence: 'database-service depends-on Service API (context: All services depend on database-service:)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: documentation-service/README.md
+      target: analytics-service/api.md
+      type: implements
+      confidence: 0.7
+      signals:
+        - type: structural
+          value: 0.7
+          evidence: and provides interactive API testing via Swagger UI
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/README.md
+      target: database-service/README.md
+      type: mentions
+      confidence: 0.7
+      signals:
+        - type: mention
+          value: 0.7
+          evidence: Notifications uses Handlebars templates stored in database-service and cached in cache-service
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: recommendation-service/README.md
+      target: analytics-service/api.md
+      type: calls
+      confidence: 0.7
+      signals:
+        - type: structural
+          value: 0.7
+          evidence: 'Recommendation Service calls Service API (context: Services call recommendation-service via REST API:)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: analytics-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: analytics-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: api-gateway-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: api-gateway-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: auth-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: auth-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: cache-service/README.md
+      target: analytics-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: 'cache-service mentions Service API (context: All services use the cache-service:)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: cache-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: cache-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: database-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: database-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: deployment-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: deployment-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: documentation-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: documentation-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: email-service/README.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Email delivery provider integration. Handles SMTP communication, bounce tracking, unsubscribe management, and deliver...
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: email-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: email-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: inventory-service/README.md
+      target: analytics-service/api.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'inventory-service depends-on Service API (context: Integrates with warehouse management system via deployment-s...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: inventory-service/README.md
+      target: deployment-service/README.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'inventory-service depends-on Deployment Service (context: Integrates with warehouse management system via deployment-s...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: inventory-service/README.md
+      target: order-service/README.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'inventory-service depends-on order-service (context: Integrates with warehouse management system via deployment-s...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: inventory-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: inventory-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: logging-service/README.md
+      target: analytics-service/api.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'logging-service depends-on Service API (context: Centralized logging and log aggregation platform. Collects l...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: logging-service/README.md
+      target: search-service/README.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'logging-service depends-on search-service (context: Centralized logging and log aggregation platform. Collects l...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: logging-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: logging-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: monitoring-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: monitoring-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/README.md
+      target: analytics-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: 'notification-service mentions Service API (context: Notifications use Handlebars templates stored in database-se...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/README.md
+      target: cache-service/README.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: 'notification-service mentions cache-service (context: Notifications use Handlebars templates stored in database-se...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/README.md
+      target: order-service/README.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: 'notification-service mentions order-service (context: Notifications use Handlebars templates stored in database-se...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: notification-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: order-service/README.md
+      target: analytics-service/api.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'order-service depends-on Service API (context: Create order record in database-service)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: order-service/README.md
+      target: database-service/README.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'order-service depends-on database-service (context: Create order record in database-service)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: order-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: order-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: payment-service/README.md
+      target: auth-service/README.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'payment-service depends-on auth-service (context: Payment processing and financial transaction management. Han...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: payment-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: payment-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: recommendation-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: recommendation-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: search-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: search-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: security-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: security-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: sms-service/README.md
+      target: analytics-service/api.md
+      type: depends-on
+      confidence: 0.65
+      signals:
+        - type: structural
+          value: 0.65
+          evidence: 'sms-service depends-on Service API (context: Integrates with Twilio API. Webhooks from Twilio notify of d...)'
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: sms-service/api.md
+      target: user-service/api.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service API Endpoints Health Check
+      reviewed: false
+      status: pending
+      user_notes: ""
+    - source: sms-service/architecture.md
+      target: user-service/architecture.md
+      type: mentions
+      confidence: 0.65
+      signals:
+        - type: mention
+          value: 0.65
+          evidence: Service Architecture Components Handler
+      reviewed: false
+      status: pending
+      user_notes: ""

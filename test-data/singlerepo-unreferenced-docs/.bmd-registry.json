@@ -1,0 +1,45 @@
+{
+  "components": {
+    "analytics-tracking": {
+      "id": "analytics-tracking",
+      "name": "Analytics and Tracking",
+      "file_ref": "analytics-tracking.md",
+      "type": "unknown",
+      "source_file": "analytics-tracking.md",
+      "detected_at": "2026-03-07T13:23:25.1292+05:30"
+    },
+    "logging-infrastructure": {
+      "id": "logging-infrastructure",
+      "name": "Logging Infrastructure",
+      "file_ref": "logging-infrastructure.md",
+      "type": "unknown",
+      "source_file": "logging-infrastructure.md",
+      "detected_at": "2026-03-07T13:23:25.1292+05:30"
+    },
+    "notification-system": {
+      "id": "notification-system",
+      "name": "Notification System",
+      "file_ref": "notification-system.md",
+      "type": "unknown",
+      "source_file": "notification-system.md",
+      "detected_at": "2026-03-07T13:23:25.129201+05:30"
+    },
+    "payment-processing": {
+      "id": "payment-processing",
+      "name": "Payment Processing Module",
+      "file_ref": "payment-processing.md",
+      "type": "unknown",
+      "source_file": "payment-processing.md",
+      "detected_at": "2026-03-07T13:23:25.129196+05:30"
+    },
+    "user-authentication": {
+      "id": "user-authentication",
+      "name": "User Authentication System",
+      "file_ref": "user-authentication.md",
+      "type": "unknown",
+      "source_file": "user-authentication.md",
+      "detected_at": "2026-03-07T13:23:25.129199+05:30"
+    }
+  },
+  "relationships": []
+}

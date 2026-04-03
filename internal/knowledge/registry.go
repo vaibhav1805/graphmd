@@ -27,16 +27,13 @@ const (
 	SignalLLM SignalSource = "llm"
 )
 
-// ComponentType categorises the kind of component.
-type ComponentType string
+// ComponentTypeAPI is an alias for ComponentTypeGateway, preserved for
+// backward compatibility with existing registry data.
+const ComponentTypeAPI = ComponentTypeGateway
 
-const (
-	ComponentTypeService  ComponentType = "service"
-	ComponentTypeAPI      ComponentType = "api"
-	ComponentTypeConfig   ComponentType = "config"
-	ComponentTypeDatabase ComponentType = "database"
-	ComponentTypeUnknown  ComponentType = "unknown"
-)
+// ComponentTypeConfig is an alias for ComponentTypeConfigServer, preserved for
+// backward compatibility with existing registry data.
+const ComponentTypeConfig = ComponentTypeConfigServer
 
 // RegistryComponent is a component tracked by the ComponentRegistry.
 // It extends the existing Component detection with richer metadata.
@@ -513,19 +510,8 @@ func nodeToRegistryID(nodeID string) string {
 
 // inferComponentType infers a ComponentType from the node file path.
 func inferComponentType(nodeID string) ComponentType {
-	lower := strings.ToLower(nodeID)
-	switch {
-	case strings.Contains(lower, "service"):
-		return ComponentTypeService
-	case strings.Contains(lower, "api"):
-		return ComponentTypeAPI
-	case strings.Contains(lower, "config"):
-		return ComponentTypeConfig
-	case strings.Contains(lower, "db") || strings.Contains(lower, "database") || strings.Contains(lower, "store"):
-		return ComponentTypeDatabase
-	default:
-		return ComponentTypeUnknown
-	}
+	ct, _ := InferComponentType(nodeID)
+	return ct
 }
 
 // ToJSON serializes the registry to JSON bytes.

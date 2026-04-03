@@ -1,0 +1,72 @@
+{
+  "file": "/Users/flurryhead/Developer/Opensource/bmd/test-data/singlerepo-unreferenced-docs/user-authentication.md",
+  "root": {
+    "heading": "",
+    "summary": "",
+    "content": "# User Authentication System\n\n## Overview\n\nThis document describes the internal authentication mechanisms used in our system.\n\n## Implementation Details\n\n### Password Hashing\nWe use bcrypt for password hashing with a cost factor of 12.\n\n### Session Management\nSessions are stored in memory with TTL of 24 hours.\n\n### Token Generation\nTokens are generated using HMAC-SHA256.\n\n## Security Considerations\n\n- All passwords are salted before hashing\n- Sessions expire automatically\n- Tokens are signed to prevent tampering\n\n## References\nThis system handles user login and registration internally.\n",
+    "line_start": 0,
+    "line_end": 25,
+    "children": [
+      {
+        "heading": "User Authentication System",
+        "summary": "# User Authentication System\n\n## Overview\n\nThis document describes the internal authentication mecha",
+        "content": "# User Authentication System\n\n## Overview\n\nThis document describes the internal authentication mechanisms used in our system.\n\n## Implementation Details\n\n### Password Hashing\nWe use bcrypt for password hashing with a cost factor of 12.\n\n### Session Management\nSessions are stored in memory with TTL of 24 hours.\n\n### Token Generation\nTokens are generated using HMAC-SHA256.\n\n## Security Considerations\n\n- All passwords are salted before hashing\n- Sessions expire automatically\n- Tokens are signed to prevent tampering\n\n## References\nThis system handles user login and registration internally.",
+        "line_start": 0,
+        "line_end": 25,
+        "children": [
+          {
+            "heading": "Overview",
+            "summary": "## Overview\n\nThis document describes the internal authentication mechanisms used in our system.",
+            "content": "## Overview\n\nThis document describes the internal authentication mechanisms used in our system.",
+            "line_start": 2,
+            "line_end": 5
+          },
+          {
+            "heading": "Implementation Details",
+            "summary": "## Implementation Details\n\n### Password Hashing\nWe use bcrypt for password hashing with a cost facto",
+            "content": "## Implementation Details\n\n### Password Hashing\nWe use bcrypt for password hashing with a cost factor of 12.\n\n### Session Management\nSessions are stored in memory with TTL of 24 hours.\n\n### Token Generation\nTokens are generated using HMAC-SHA256.",
+            "line_start": 6,
+            "line_end": 16,
+            "children": [
+              {
+                "heading": "Password Hashing",
+                "summary": "### Password Hashing\nWe use bcrypt for password hashing with a cost factor of 12.",
+                "content": "### Password Hashing\nWe use bcrypt for password hashing with a cost factor of 12.",
+                "line_start": 8,
+                "line_end": 10
+              },
+              {
+                "heading": "Session Management",
+                "summary": "### Session Management\nSessions are stored in memory with TTL of 24 hours.",
+                "content": "### Session Management\nSessions are stored in memory with TTL of 24 hours.",
+                "line_start": 11,
+                "line_end": 13
+              },
+              {
+                "heading": "Token Generation",
+                "summary": "### Token Generation\nTokens are generated using HMAC-SHA256.",
+                "content": "### Token Generation\nTokens are generated using HMAC-SHA256.",
+                "line_start": 14,
+                "line_end": 16
+              }
+            ]
+          },
+          {
+            "heading": "Security Considerations",
+            "summary": "## Security Considerations\n\n- All passwords are salted before hashing\n- Sessions expire automaticall",
+            "content": "## Security Considerations\n\n- All passwords are salted before hashing\n- Sessions expire automatically\n- Tokens are signed to prevent tampering",
+            "line_start": 17,
+            "line_end": 22
+          },
+          {
+            "heading": "References",
+            "summary": "## References\nThis system handles user login and registration internally.",
+            "content": "## References\nThis system handles user login and registration internally.",
+            "line_start": 23,
+            "line_end": 25
+          }
+        ]
+      }
+    ]
+  }
+}

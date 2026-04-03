@@ -43,7 +43,7 @@ import (
 
 // SchemaVersion is incremented each time the database schema changes.
 // Migrations run automatically in Migrate() when an older database is opened.
-const SchemaVersion = 2
+const SchemaVersion = 3
 
 // Database wraps an open SQLite connection and provides domain-level
 // read/write operations for indexes and knowledge graphs.
@@ -154,15 +154,32 @@ CREATE TABLE IF NOT EXISTS bm25_stats (
 
 -- graph_nodes: vertices in the knowledge graph.
 -- metadata is a JSON object (e.g. {"heading_level": 1, "line_range": [1,40]}).
+-- component_type classifies the node using the 12-type taxonomy (default: unknown).
 CREATE TABLE IF NOT EXISTS graph_nodes (
-  id       TEXT PRIMARY KEY,
-  type     TEXT NOT NULL,
-  file     TEXT NOT NULL,
-  title    TEXT,
-  content  TEXT,
-  metadata TEXT
+  id             TEXT PRIMARY KEY,
+  type           TEXT NOT NULL,
+  file           TEXT NOT NULL,
+  title          TEXT,
+  content        TEXT,
+  metadata       TEXT,
+  component_type TEXT NOT NULL DEFAULT 'unknown'
 );
 CREATE INDEX IF NOT EXISTS idx_nodes_type ON graph_nodes(type);
+CREATE INDEX IF NOT EXISTS idx_nodes_component_type ON graph_nodes(component_type);
+
+-- component_mentions: tracks where each component was detected, providing
+-- provenance for "where was this found?" queries.
+CREATE TABLE IF NOT EXISTS component_mentions (
+  id                INTEGER PRIMARY KEY,
+  component_id      TEXT    NOT NULL,
+  file_path         TEXT    NOT NULL,
+  heading_hierarchy TEXT,
+  detected_by       TEXT    NOT NULL,
+  confidence        REAL    NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0),
+  FOREIGN KEY(component_id) REFERENCES graph_nodes(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_mentions_component ON component_mentions(component_id);
+CREATE INDEX IF NOT EXISTS idx_mentions_file ON component_mentions(file_path);
 
 -- graph_edges: directed edges in the knowledge graph.
 -- confidence must be in [0.0, 1.0] (enforced by CHECK constraint).
@@ -206,6 +223,8 @@ func (db *Database) Initialize() error {
 
 // execMulti splits sql on ";" and executes each non-empty statement.
 // This is required because database/sql does not support multi-statement Exec.
+// Index creation errors on columns that don't yet exist (pre-migration) are
+// tolerated — the migration will add the column and index.
 func (db *Database) execMulti(sql string) error {
 	for _, stmt := range strings.Split(sql, ";") {
 		stmt = strings.TrimSpace(stmt)
@@ -213,6 +232,15 @@ func (db *Database) execMulti(sql string) error {
 			continue
 		}
 		if _, err := db.conn.Exec(stmt); err != nil {
+			// Tolerate index/table creation errors referencing columns or tables
+			// that will be added by a migration (e.g. component_type on an older DB).
+			errStr := err.Error()
+			isIndexOrCreate := strings.Contains(strings.ToUpper(stmt), "CREATE INDEX") ||
+				strings.Contains(strings.ToUpper(stmt), "CREATE TABLE")
+			if isIndexOrCreate && (strings.Contains(errStr, "no such column") ||
+				strings.Contains(errStr, "no such table")) {
+				continue
+			}
 			return fmt.Errorf("exec %q: %w", stmt[:min(len(stmt), 60)], err)
 		}
 	}
@@ -254,6 +282,11 @@ func (db *Database) Migrate() error {
 			return fmt.Errorf("knowledge.Database.Migrate: v1→v2: %w", err)
 		}
 	}
+	if current < 3 {
+		if err := db.migrateV2ToV3(); err != nil {
+			return fmt.Errorf("knowledge.Database.Migrate: v2→v3: %w", err)
+		}
+	}
 
 	// Ensure the stored version reflects the latest schema.
 	if current < SchemaVersion {
@@ -286,6 +319,47 @@ func (db *Database) migrateV1ToV2() error {
 			}
 		}
 	}
+	return nil
+}
+
+// migrateV2ToV3 adds component_type column to graph_nodes and creates the
+// component_mentions table for provenance tracking.
+func (db *Database) migrateV2ToV3() error {
+	// Add component_type column (nullable ALTER, then default via trigger).
+	alterStmt := `ALTER TABLE graph_nodes ADD COLUMN component_type TEXT NOT NULL DEFAULT 'unknown'`
+	if _, err := db.conn.Exec(alterStmt); err != nil {
+		if !strings.Contains(err.Error(), "duplicate column") {
+			return fmt.Errorf("exec %q: %w", alterStmt, err)
+		}
+	}
+
+	// Create component_mentions table.
+	mentionsSQL := `
+CREATE TABLE IF NOT EXISTS component_mentions (
+  id                INTEGER PRIMARY KEY,
+  component_id      TEXT    NOT NULL,
+  file_path         TEXT    NOT NULL,
+  heading_hierarchy TEXT,
+  detected_by       TEXT    NOT NULL,
+  confidence        REAL    NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0),
+  FOREIGN KEY(component_id) REFERENCES graph_nodes(id) ON DELETE CASCADE
+)`
+	if _, err := db.conn.Exec(mentionsSQL); err != nil {
+		return fmt.Errorf("create component_mentions: %w", err)
+	}
+
+	// Create indexes.
+	indexes := []string{
+		`CREATE INDEX IF NOT EXISTS idx_nodes_component_type ON graph_nodes(component_type)`,
+		`CREATE INDEX IF NOT EXISTS idx_mentions_component ON component_mentions(component_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_mentions_file ON component_mentions(file_path)`,
+	}
+	for _, idx := range indexes {
+		if _, err := db.conn.Exec(idx); err != nil {
+			return fmt.Errorf("exec %q: %w", idx, err)
+		}
+	}
+
 	return nil
 }
 
@@ -750,10 +824,14 @@ func (db *Database) SaveGraph(graph *Graph) error {
 				end = len(nodes)
 			}
 			for _, n := range nodes[start:end] {
+				compType := n.ComponentType
+				if compType == "" {
+					compType = ComponentTypeUnknown
+				}
 				_, err := tx.Exec(
-					`INSERT OR REPLACE INTO graph_nodes (id, type, file, title, content, metadata)
-					 VALUES (?, ?, ?, ?, ?, ?)`,
-					n.ID, n.Type, n.ID /* file == ID */, n.Title, nil, nil,
+					`INSERT OR REPLACE INTO graph_nodes (id, type, file, title, content, metadata, component_type)
+					 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+					n.ID, n.Type, n.ID /* file == ID */, n.Title, nil, nil, string(compType),
 				)
 				if err != nil {
 					return fmt.Errorf("insert graph_node %q: %w", n.ID, err)
@@ -772,6 +850,14 @@ func (db *Database) SaveGraph(graph *Graph) error {
 				end = len(edges)
 			}
 			for _, e := range edges[start:end] {
+				// Skip edges that reference non-existent nodes (dangling references
+				// from the extractor or discovery algorithms).
+				if _, ok := graph.Nodes[e.Source]; !ok {
+					continue
+				}
+				if _, ok := graph.Nodes[e.Target]; !ok {
+					continue
+				}
 				_, err := tx.Exec(
 					`INSERT OR REPLACE INTO graph_edges
 					 (id, source_id, target_id, type, confidence, evidence)
@@ -796,7 +882,7 @@ func (db *Database) LoadGraph(graph *Graph) error {
 
 	// Load nodes in deterministic order (sorted by ID).
 	nRows, err := db.conn.Query(
-		`SELECT id, type, file, title FROM graph_nodes ORDER BY id ASC`,
+		`SELECT id, type, file, title, component_type FROM graph_nodes ORDER BY id ASC`,
 	)
 	if err != nil {
 		return fmt.Errorf("knowledge.Database.LoadGraph: query graph_nodes: %w", err)
@@ -805,11 +891,15 @@ func (db *Database) LoadGraph(graph *Graph) error {
 
 	for nRows.Next() {
 		var id, nodeType, file string
-		var title sql.NullString
-		if err := nRows.Scan(&id, &nodeType, &file, &title); err != nil {
+		var title, compType sql.NullString
+		if err := nRows.Scan(&id, &nodeType, &file, &title, &compType); err != nil {
 			return fmt.Errorf("knowledge.Database.LoadGraph: scan node: %w", err)
 		}
-		n := &Node{ID: id, Type: nodeType, Title: title.String}
+		ct := ComponentType(compType.String)
+		if ct == "" {
+			ct = ComponentTypeUnknown
+		}
+		n := &Node{ID: id, Type: nodeType, Title: title.String, ComponentType: ct}
 		graph.Nodes[id] = n
 	}
 	if err := nRows.Err(); err != nil {
@@ -849,6 +939,76 @@ func (db *Database) LoadGraph(graph *Graph) error {
 	}
 
 	return nil
+}
+
+// ─── component mention persistence ───────────────────────────────────────────
+
+// ComponentMention represents a single detection provenance record.
+type ComponentMention struct {
+	ComponentID      string  `json:"component_id"`
+	FilePath         string  `json:"file_path"`
+	HeadingHierarchy string  `json:"heading_hierarchy,omitempty"`
+	DetectedBy       string  `json:"detected_by"`
+	Confidence       float64 `json:"confidence"`
+}
+
+// SaveComponentMentions inserts a batch of component mentions into the database.
+// Existing mentions for the given component IDs are cleared first.
+func (db *Database) SaveComponentMentions(mentions []ComponentMention) error {
+	if len(mentions) == 0 {
+		return nil
+	}
+	return transaction(db.conn, func(tx *sql.Tx) error {
+		// Collect unique component IDs to clear.
+		ids := make(map[string]bool)
+		for _, m := range mentions {
+			ids[m.ComponentID] = true
+		}
+		for id := range ids {
+			if _, err := tx.Exec(`DELETE FROM component_mentions WHERE component_id = ?`, id); err != nil {
+				return fmt.Errorf("clear mentions for %q: %w", id, err)
+			}
+		}
+
+		for _, m := range mentions {
+			_, err := tx.Exec(
+				`INSERT INTO component_mentions (component_id, file_path, heading_hierarchy, detected_by, confidence)
+				 VALUES (?, ?, ?, ?, ?)`,
+				m.ComponentID, m.FilePath, m.HeadingHierarchy, m.DetectedBy, m.Confidence,
+			)
+			if err != nil {
+				return fmt.Errorf("insert mention for %q: %w", m.ComponentID, err)
+			}
+		}
+		return nil
+	})
+}
+
+// ListComponentsByType returns all graph nodes with the given component type.
+func (db *Database) ListComponentsByType(ct ComponentType) ([]*Node, error) {
+	rows, err := db.conn.Query(
+		`SELECT id, type, file, title, component_type FROM graph_nodes WHERE component_type = ? ORDER BY id ASC`,
+		string(ct),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("knowledge.Database.ListComponentsByType: %w", err)
+	}
+	defer rows.Close()
+
+	var nodes []*Node
+	for rows.Next() {
+		var id, nodeType, file string
+		var title, compType sql.NullString
+		if err := rows.Scan(&id, &nodeType, &file, &title, &compType); err != nil {
+			return nil, fmt.Errorf("knowledge.Database.ListComponentsByType: scan: %w", err)
+		}
+		ct := ComponentType(compType.String)
+		if ct == "" {
+			ct = ComponentTypeUnknown
+		}
+		nodes = append(nodes, &Node{ID: id, Type: nodeType, Title: title.String, ComponentType: ct})
+	}
+	return nodes, rows.Err()
 }
 
 // ─── incremental update detection ────────────────────────────────────────────

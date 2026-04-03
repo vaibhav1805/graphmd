@@ -1,0 +1,56 @@
+{
+  "file": "/Users/flurryhead/Developer/Opensource/bmd/test-data/singlerepo-unreferenced-docs/notification-system.md",
+  "root": {
+    "heading": "",
+    "summary": "",
+    "content": "# Notification System\n\n## Overview\n\nManages all user notifications across the platform.\n\n## Channel Support\n\n- Email notifications\n- SMS alerts\n- Push notifications\n- In-app messaging\n\n## Notification Types\n\n- Account alerts\n- Transaction confirmations\n- System maintenance notices\n- Promotional messages\n\n## Configuration\n\nEach user can configure notification preferences:\n- Frequency (immediate, daily digest, weekly)\n- Channels (which methods to use)\n- Categories (which types to receive)\n\n## Delivery Guarantees\n\n- At-least-once delivery semantics\n- Exponential backoff on failures\n- Dead letter queue for failed messages\n",
+    "line_start": 0,
+    "line_end": 32,
+    "children": [
+      {
+        "heading": "Notification System",
+        "summary": "# Notification System\n\n## Overview\n\nManages all user notifications across the platform.\n\n## Channel ",
+        "content": "# Notification System\n\n## Overview\n\nManages all user notifications across the platform.\n\n## Channel Support\n\n- Email notifications\n- SMS alerts\n- Push notifications\n- In-app messaging\n\n## Notification Types\n\n- Account alerts\n- Transaction confirmations\n- System maintenance notices\n- Promotional messages\n\n## Configuration\n\nEach user can configure notification preferences:\n- Frequency (immediate, daily digest, weekly)\n- Channels (which methods to use)\n- Categories (which types to receive)\n\n## Delivery Guarantees\n\n- At-least-once delivery semantics\n- Exponential backoff on failures\n- Dead letter queue for failed messages",
+        "line_start": 0,
+        "line_end": 32,
+        "children": [
+          {
+            "heading": "Overview",
+            "summary": "## Overview\n\nManages all user notifications across the platform.",
+            "content": "## Overview\n\nManages all user notifications across the platform.",
+            "line_start": 2,
+            "line_end": 5
+          },
+          {
+            "heading": "Channel Support",
+            "summary": "## Channel Support\n\n- Email notifications\n- SMS alerts\n- Push notifications\n- In-app messaging",
+            "content": "## Channel Support\n\n- Email notifications\n- SMS alerts\n- Push notifications\n- In-app messaging",
+            "line_start": 6,
+            "line_end": 12
+          },
+          {
+            "heading": "Notification Types",
+            "summary": "## Notification Types\n\n- Account alerts\n- Transaction confirmations\n- System maintenance notices\n- P",
+            "content": "## Notification Types\n\n- Account alerts\n- Transaction confirmations\n- System maintenance notices\n- Promotional messages",
+            "line_start": 13,
+            "line_end": 19
+          },
+          {
+            "heading": "Configuration",
+            "summary": "## Configuration\n\nEach user can configure notification preferences:\n- Frequency (immediate, daily di",
+            "content": "## Configuration\n\nEach user can configure notification preferences:\n- Frequency (immediate, daily digest, weekly)\n- Channels (which methods to use)\n- Categories (which types to receive)",
+            "line_start": 20,
+            "line_end": 26
+          },
+          {
+            "heading": "Delivery Guarantees",
+            "summary": "## Delivery Guarantees\n\n- At-least-once delivery semantics\n- Exponential backoff on failures\n- Dead ",
+            "content": "## Delivery Guarantees\n\n- At-least-once delivery semantics\n- Exponential backoff on failures\n- Dead letter queue for failed messages",
+            "line_start": 27,
+            "line_end": 32
+          }
+        ]
+      }
+    ]
+  }
+}

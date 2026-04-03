@@ -28,6 +28,8 @@ func main() {
 		cmdDepends()
 	case "components":
 		cmdComponents()
+	case "list":
+		cmdList()
 	case "context":
 		cmdContext()
 	case "relationships":
@@ -82,6 +84,15 @@ func cmdIndex() {
 
 	graph := knowledge.NewGraph()
 
+	// Add documents as graph nodes.
+	for _, doc := range docs {
+		_ = graph.AddNode(&knowledge.Node{
+			ID:    doc.ID,
+			Title: doc.Title,
+			Type:  "document",
+		})
+	}
+
 	// Extract link-based edges
 	fmt.Fprintf(os.Stderr, "Extracting links...\n")
 	extractor := knowledge.NewExtractor(absDir)
@@ -118,14 +129,47 @@ func cmdIndex() {
 	}
 	defer db.Close()
 
+	// Classify component types on graph nodes before saving.
+	fmt.Fprintf(os.Stderr, "Classifying component types...\n")
+	detector := knowledge.NewComponentDetector()
+	components := detector.DetectComponents(graph, docs)
+	var mentions []knowledge.ComponentMention
+	typeCount := 0
+	for _, comp := range components {
+		// Update the graph node with the detected component type.
+		if node, ok := graph.Nodes[comp.File]; ok {
+			node.ComponentType = comp.Type
+			typeCount++
+		}
+		// Build component mention for provenance tracking.
+		methods := "auto"
+		if len(comp.DetectionMethods) > 0 {
+			methods = strings.Join(comp.DetectionMethods, ",")
+		}
+		mentions = append(mentions, knowledge.ComponentMention{
+			ComponentID: comp.File,
+			FilePath:    comp.File,
+			DetectedBy:  methods,
+			Confidence:  comp.TypeConfidence,
+		})
+	}
+
 	fmt.Fprintf(os.Stderr, "Saving graph...\n")
 	if err := db.SaveGraph(graph); err != nil {
 		fmt.Fprintf(os.Stderr, "Error saving graph: %v\n", err)
 		os.Exit(1)
 	}
 
+	// Save component mentions for provenance tracking.
+	if len(mentions) > 0 {
+		if err := db.SaveComponentMentions(mentions); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to save component mentions: %v\n", err)
+		}
+	}
+
 	fmt.Printf("✓ Indexed %d documents\n", len(docs))
 	fmt.Printf("✓ Found %d relationships\n", graph.EdgeCount())
+	fmt.Printf("✓ Classified %d component types\n", typeCount)
 	if *llmDiscovery {
 		fmt.Printf("✓ LLM discovery enabled\n")
 	}
@@ -335,6 +379,121 @@ func cmdComponents() {
 	}
 }
 
+func cmdList() {
+	fs := flag.NewFlagSet("list", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	typeName := fs.String("type", "", "Filter by component type (e.g. service, database, cache)")
+	includeTags := fs.Bool("include-tags", false, "Include tag-based matches in addition to primary type matches")
+
+	fs.Parse(os.Args[2:])
+
+	if *typeName == "" {
+		fmt.Fprintf(os.Stderr, "Error: --type is required\n")
+		fmt.Fprintf(os.Stderr, "Usage: graphmd list --type TYPE [--include-tags]\n")
+		fmt.Fprintf(os.Stderr, "\nValid types: ")
+		for _, ct := range knowledge.AllComponentTypes() {
+			fmt.Fprintf(os.Stderr, "%s ", string(ct))
+		}
+		fmt.Fprintf(os.Stderr, "\n")
+		os.Exit(1)
+	}
+
+	ct := knowledge.ComponentType(*typeName)
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph from the indexed directory.
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Collect results.
+	type listResult struct {
+		Name       string  `json:"name"`
+		ID         string  `json:"id"`
+		Type       string  `json:"type"`
+		MatchType  string  `json:"match_type"`
+		Confidence float64 `json:"confidence"`
+		File       string  `json:"file"`
+	}
+
+	var results []listResult
+	primaryCount := 0
+	tagCount := 0
+
+	for _, node := range graph.Nodes {
+		if node.ComponentType == ct {
+			// Primary type match.
+			results = append(results, listResult{
+				Name:       node.Title,
+				ID:         node.ID,
+				Type:       string(node.ComponentType),
+				MatchType:  "primary",
+				Confidence: 1.0, // Exact type match.
+				File:       node.ID,
+			})
+			primaryCount++
+		} else if *includeTags {
+			// Tag-based match: check if the node's name or title contains the type keyword.
+			inferredType, inferredConf := knowledge.InferComponentType(node.ID, node.Title)
+			if inferredType == ct {
+				results = append(results, listResult{
+					Name:       node.Title,
+					ID:         node.ID,
+					Type:       string(node.ComponentType),
+					MatchType:  "tag",
+					Confidence: inferredConf,
+					File:       node.ID,
+				})
+				tagCount++
+			}
+		}
+	}
+
+	// Build output.
+	type listOutput struct {
+		Components []listResult `json:"components"`
+		Summary    struct {
+			Type         string `json:"type"`
+			Mode         string `json:"mode"`
+			PrimaryCount int    `json:"primary_count"`
+			TagCount     int    `json:"tag_count"`
+			TotalCount   int    `json:"total_count"`
+		} `json:"summary"`
+	}
+
+	output := listOutput{Components: results}
+	if output.Components == nil {
+		output.Components = []listResult{}
+	}
+	output.Summary.Type = *typeName
+	if *includeTags {
+		output.Summary.Mode = "inclusive"
+	} else {
+		output.Summary.Mode = "strict"
+	}
+	output.Summary.PrimaryCount = primaryCount
+	output.Summary.TagCount = tagCount
+	output.Summary.TotalCount = primaryCount + tagCount
+
+	data, _ := json.MarshalIndent(output, "", "  ")
+	fmt.Println(string(data))
+}
+
 func cmdContext() {
 	fs := flag.NewFlagSet("context", flag.ExitOnError)
 	dir := fs.String("dir", ".", "Directory to search")
@@ -541,6 +700,7 @@ Commands:
   crawl           Traverse the dependency graph from starting files
   depends         Show service dependencies
   components      List discovered components
+  list            List components filtered by type
   context         Assemble RAG context for a query
   relationships   List discovered relationships with confidence scores
   graph           Export the full dependency graph
@@ -554,6 +714,8 @@ Examples:
   graphmd crawl --from-multiple api.md,auth.md --direction backward
   graphmd depends --service api-gateway --dir ./docs
   graphmd components --dir ./docs --format json
+  graphmd list --type service --dir ./docs
+  graphmd list --type database --include-tags --dir ./docs
   graphmd context "how does auth work" --dir ./docs
   graphmd relationships --dir ./docs --min-confidence 0.8
   graphmd graph --dir ./docs --format dot

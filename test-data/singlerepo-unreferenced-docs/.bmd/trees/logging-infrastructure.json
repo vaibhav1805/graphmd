@@ -1,0 +1,56 @@
+{
+  "file": "/Users/flurryhead/Developer/Opensource/bmd/test-data/singlerepo-unreferenced-docs/logging-infrastructure.md",
+  "root": {
+    "heading": "",
+    "summary": "",
+    "content": "# Logging Infrastructure\n\n## Overview\n\nCentralized logging system for all application components.\n\n## Log Levels\n\n- DEBUG: Development debugging\n- INFO: General informational messages\n- WARN: Warning conditions\n- ERROR: Error conditions\n- FATAL: System failures\n\n## Aggregation\n\nLogs are aggregated from all services into a central repository.\n\n## Retention\n\n- Application logs: 30 days\n- Error logs: 90 days\n- Audit logs: 1 year\n\n## Querying\n\nUse standard grep and log aggregation tools to search logs.\n",
+    "line_start": 0,
+    "line_end": 27,
+    "children": [
+      {
+        "heading": "Logging Infrastructure",
+        "summary": "# Logging Infrastructure\n\n## Overview\n\nCentralized logging system for all application components.\n\n#",
+        "content": "# Logging Infrastructure\n\n## Overview\n\nCentralized logging system for all application components.\n\n## Log Levels\n\n- DEBUG: Development debugging\n- INFO: General informational messages\n- WARN: Warning conditions\n- ERROR: Error conditions\n- FATAL: System failures\n\n## Aggregation\n\nLogs are aggregated from all services into a central repository.\n\n## Retention\n\n- Application logs: 30 days\n- Error logs: 90 days\n- Audit logs: 1 year\n\n## Querying\n\nUse standard grep and log aggregation tools to search logs.",
+        "line_start": 0,
+        "line_end": 27,
+        "children": [
+          {
+            "heading": "Overview",
+            "summary": "## Overview\n\nCentralized logging system for all application components.",
+            "content": "## Overview\n\nCentralized logging system for all application components.",
+            "line_start": 2,
+            "line_end": 5
+          },
+          {
+            "heading": "Log Levels",
+            "summary": "## Log Levels\n\n- DEBUG: Development debugging\n- INFO: General informational messages\n- WARN: Warning",
+            "content": "## Log Levels\n\n- DEBUG: Development debugging\n- INFO: General informational messages\n- WARN: Warning conditions\n- ERROR: Error conditions\n- FATAL: System failures",
+            "line_start": 6,
+            "line_end": 13
+          },
+          {
+            "heading": "Aggregation",
+            "summary": "## Aggregation\n\nLogs are aggregated from all services into a central repository.",
+            "content": "## Aggregation\n\nLogs are aggregated from all services into a central repository.",
+            "line_start": 14,
+            "line_end": 17
+          },
+          {
+            "heading": "Retention",
+            "summary": "## Retention\n\n- Application logs: 30 days\n- Error logs: 90 days\n- Audit logs: 1 year",
+            "content": "## Retention\n\n- Application logs: 30 days\n- Error logs: 90 days\n- Audit logs: 1 year",
+            "line_start": 18,
+            "line_end": 23
+          },
+          {
+            "heading": "Querying",
+            "summary": "## Querying\n\nUse standard grep and log aggregation tools to search logs.",
+            "content": "## Querying\n\nUse standard grep and log aggregation tools to search logs.",
+            "line_start": 24,
+            "line_end": 27
+          }
+        ]
+      }
+    ]
+  }
+}

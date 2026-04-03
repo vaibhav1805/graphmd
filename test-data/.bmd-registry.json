@@ -1,0 +1,2066 @@
+{
+  "components": {
+    "analytics-service": {
+      "id": "analytics-service",
+      "name": "Analytics Service",
+      "file_ref": "analytics-service/README.md",
+      "type": "service",
+      "source_file": "analytics-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337405+05:30"
+    },
+    "api-gateway-service": {
+      "id": "api-gateway-service",
+      "name": "API Gateway Service",
+      "file_ref": "api-gateway-service/README.md",
+      "type": "service",
+      "source_file": "api-gateway-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337409+05:30"
+    },
+    "auth-service": {
+      "id": "auth-service",
+      "name": "Auth Service",
+      "file_ref": "auth-service/README.md",
+      "type": "service",
+      "source_file": "auth-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337413+05:30"
+    },
+    "cache-service": {
+      "id": "cache-service",
+      "name": "Cache Service",
+      "file_ref": "cache-service/README.md",
+      "type": "service",
+      "source_file": "cache-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337417+05:30"
+    },
+    "database-service": {
+      "id": "database-service",
+      "name": "Database Service",
+      "file_ref": "database-service/README.md",
+      "type": "service",
+      "source_file": "database-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.33742+05:30"
+    },
+    "deployment-service": {
+      "id": "deployment-service",
+      "name": "Deployment Service",
+      "file_ref": "deployment-service/README.md",
+      "type": "service",
+      "source_file": "deployment-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337424+05:30"
+    },
+    "documentation-service": {
+      "id": "documentation-service",
+      "name": "Documentation Service",
+      "file_ref": "documentation-service/README.md",
+      "type": "service",
+      "source_file": "documentation-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337427+05:30"
+    },
+    "email-service": {
+      "id": "email-service",
+      "name": "Email Service",
+      "file_ref": "email-service/README.md",
+      "type": "service",
+      "source_file": "email-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337431+05:30"
+    },
+    "inventory-service": {
+      "id": "inventory-service",
+      "name": "Inventory Service",
+      "file_ref": "inventory-service/README.md",
+      "type": "service",
+      "source_file": "inventory-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337435+05:30"
+    },
+    "logging-service": {
+      "id": "logging-service",
+      "name": "Logging Service",
+      "file_ref": "logging-service/README.md",
+      "type": "service",
+      "source_file": "logging-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337439+05:30"
+    },
+    "monitoring-service": {
+      "id": "monitoring-service",
+      "name": "Monitoring Service",
+      "file_ref": "monitoring-service/README.md",
+      "type": "service",
+      "source_file": "monitoring-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337442+05:30"
+    },
+    "notification-service": {
+      "id": "notification-service",
+      "name": "Notification Service",
+      "file_ref": "notification-service/README.md",
+      "type": "service",
+      "source_file": "notification-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337445+05:30"
+    },
+    "order-service": {
+      "id": "order-service",
+      "name": "Order Service",
+      "file_ref": "order-service/README.md",
+      "type": "service",
+      "source_file": "order-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337449+05:30"
+    },
+    "payment-service": {
+      "id": "payment-service",
+      "name": "Payment Service",
+      "file_ref": "payment-service/README.md",
+      "type": "service",
+      "source_file": "payment-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337453+05:30"
+    },
+    "recommendation-service": {
+      "id": "recommendation-service",
+      "name": "Recommendation Service",
+      "file_ref": "recommendation-service/README.md",
+      "type": "service",
+      "source_file": "recommendation-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337458+05:30"
+    },
+    "search-service": {
+      "id": "search-service",
+      "name": "Search Service",
+      "file_ref": "search-service/README.md",
+      "type": "service",
+      "source_file": "search-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337462+05:30"
+    },
+    "security-service": {
+      "id": "security-service",
+      "name": "Security Service",
+      "file_ref": "security-service/README.md",
+      "type": "service",
+      "source_file": "security-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337466+05:30"
+    },
+    "sms-service": {
+      "id": "sms-service",
+      "name": "SMS Service",
+      "file_ref": "sms-service/README.md",
+      "type": "service",
+      "source_file": "sms-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.33747+05:30"
+    },
+    "user-service": {
+      "id": "user-service",
+      "name": "User Service",
+      "file_ref": "user-service/README.md",
+      "type": "service",
+      "source_file": "user-service/README.md",
+      "detected_at": "2026-03-10T09:02:41.337475+05:30"
+    }
+  },
+  "relationships": [
+    {
+      "from_component": "readme",
+      "to_component": "api",
+      "signals": [
+        {
+          "source_type": "link",
+          "confidence": 0.85,
+          "evidence": "The API Gateway routes requests to:",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "API Gateway Service Overview Central request router and load balancer for all microservices. Routes incoming API requ...",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.8,
+          "evidence": "- **api-gateway-service**: On every request for JWT validation",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "cache-service mentions Service API (context: All services use the cache-service:)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.75,
+          "evidence": "database-service depends-on Service API (context: All services depend on database-service:)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.85,
+          "evidence": "- **api-gateway-service**: Service registration and discovery",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "Scaling policy automation Key Dependencies api-gateway-service: Service registration and discovery",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.7,
+          "evidence": "and provides interactive API testing via Swagger UI",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.85,
+          "evidence": "- **api-gateway-service**: Serves /api/docs endpoint",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.8,
+          "evidence": "- Python SDK (via OpenAPI Generator)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "Email delivery provider integration. Handles SMTP communication, bounce tracking, unsubscribe management, and deliver...",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "inventory-service depends-on Service API (context: Integrates with warehouse management system via deployment-s...)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "logging-service depends-on Service API (context: Centralized logging and log aggregation platform. Collects l...)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "notification-service mentions Service API (context: Notifications use Handlebars templates stored in database-se...)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "order-service depends-on Service API (context: Create order record in database-service)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.7,
+          "evidence": "Recommendation Service calls Service API (context: Services call recommendation-service via REST API:)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.8,
+          "evidence": "Services call recommendation-service via REST API:",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.65,
+          "evidence": "sms-service depends-on Service API (context: Integrates with Twilio API. Webhooks from Twilio notify of d...)",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.8,
+          "evidence": "Integrates with Twilio API. Webhooks from Twilio notify of delivery status changes.",
+          "weight": 1
+        },
+        {
+          "source_type": "link",
+          "confidence": 0.8,
+          "evidence": "- **api-gateway-service**: User profile endpoint",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.85
+    },
+    {
+      "from_component": "analytics-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Event source for analytics processing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "analytics-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Warehouse storage and historical data",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "analytics-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order events and funnel analysis",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "analytics-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User acquisition and cohort analysis",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "analytics-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Revenue reporting",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "analytics-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Full-text search across orders and products",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Notification endpoints",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "All requests are logged to the **logging-service** for audit trails and debugging.",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "documentation-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "See the **documentation-service** for complete OpenAPI/Swagger specs.",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "Central request router and load balancer for all microservices. Routes incoming API requests to appropriate backend services, handles authentication validation via the auth-service, applies rate limit...",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User profile and account management",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order operations",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Payment processing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "api-gateway-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **security-service**: Vulnerability scanning and threat detection",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Audit logs for all authentication events",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "The auth-service is called by:",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **api-gateway-service**: On every request for JWT validation",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User profile lookup and account verification",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Stores credentials and permission mappings",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Session token caching for fast validation (sub-ms response times)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "auth-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Payment locks and recent transactions",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Templates",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Cache hit/miss metrics",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Cache size and eviction tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "All services use the cache-service:",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Session tokens (1-hour TTL)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: Active user profiles (5-minute TTL)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/README.md",
+      "to_component": "inventory-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **inventory-service**: Stock levels (30-second TTL)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "cache-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Credentials and sessions",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order records",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Historical data for indexing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User profiles",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Transaction logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "inventory-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **inventory-service**: Stock levels",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Notification history",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **security-service**: Audit logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Query logs and slow query tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Connection pool metrics, query latency",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "database-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "deployment-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **api-gateway-service**: Service registration and discovery",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "deployment-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Health checks and alerts during deployments",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "deployment-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Deployment event logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "deployment-service/README.md",
+      "to_component": "deployment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "Auto-scaling rules managed in **deployment-service**:",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "deployment-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "documentation-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **api-gateway-service**: Serves /api/docs endpoint",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "documentation-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Full-text search of API documentation",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "documentation-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Sends API change notifications to subscribers",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "documentation-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "email-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Receives email send requests",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "email-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Bounce tracking and preference storage",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "email-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Email delivery logs and error tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "email-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Email queue depth and latency metrics",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "email-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Receives stock reservation requests",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Sends low stock alerts to operations team",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Product search integration (indexed by inventory)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Audit trail of stock changes",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "deployment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "Integrates with warehouse management system via **deployment-service** webhooks for restock orders.",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Persistent stock records and history",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Real-time stock cache (updated on every inventory change; TTL: 30 seconds for freshness)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "inventory-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "sms-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **sms-service**: SMS delivery logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Alert execution and Slack notifications",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "All services log to logging-service:",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Authentication attempts, token issuance",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order events and status changes",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Financial transactions (compliance required)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **api-gateway-service**: Request/response logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/README.md",
+      "to_component": "email-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **email-service**: Email delivery logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "logging-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "monitoring-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Alert notifications via Slack",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "monitoring-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "sms-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **sms-service**: Handles SMS delivery and carrier routing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Notification history and preferences",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Notification template cache",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User contact information and preferences",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Delivery audit trail and error logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order confirmation, tracking, delivery notifications",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "inventory-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **inventory-service**: Low stock alerts",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Payment receipts",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Password reset emails",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/README.md",
+      "to_component": "email-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **email-service**: Handles email delivery and bounce tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "notification-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "inventory-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **inventory-service**: Stock checking and reservations",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Order confirmations, shipping updates, delivery notifications",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Recent orders and in-flight order caching",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "1. User submits order via **api-gateway-service**",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: Customer lookup and validation",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "payment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **payment-service**: Payment authorization and capture",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Full-text search for orders by ID, customer, product",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Order persistence and historical data",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Order audit trail",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/README.md",
+      "to_component": "deployment-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "Orders trigger fulfillment via **deployment-service** webhooks to warehouse systems.",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "order-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Real-time transaction monitoring",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Transaction log persistence (immutable records for audits)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Distributed locks for idempotent payments; payment cache (5-minute TTL)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order context for payments",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Payment confirmation and receipt emails",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Financial audit trail (compliance requirement)",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "payment-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "recommendation-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User profiles and preferences",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "recommendation-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Order history and purchase patterns",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "recommendation-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Product search for similar items",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "recommendation-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Historical order and user data for model training",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "recommendation-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Click-through rates and recommendation performance",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "recommendation-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Sends order events for indexing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "inventory-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **inventory-service**: Product data for indexing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "user-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **user-service**: User profile indexing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Reads historical data for initial indexing",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Search query logs and performance metrics",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Search latency and QPS tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "search-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "security-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Permission validation and policy enforcement",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "security-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Security audit trail",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "security-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Compliance audit logs",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "security-service/api.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "sms-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Receives SMS send requests",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "sms-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Delivery logs and message history",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "sms-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: SMS delivery audit trail",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "sms-service/README.md",
+      "to_component": "monitoring-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **monitoring-service**: Queue depth and success rate tracking",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "sms-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "database-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **database-service**: Persistent storage of user profiles and metadata",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "logging-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **logging-service**: Audit trail for account creation/deletion",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "order-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **order-service**: Customer lookup when placing orders",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "recommendation-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **recommendation-service**: User history and preferences for recommendations",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "auth-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **auth-service**: Validates user credentials during signup; used for permission checks",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "cache-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **cache-service**: Caches active user profiles for fast lookup",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "notification-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **notification-service**: Sends welcome emails on signup, password reset confirmations",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "search-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **search-service**: Indexes user profiles for discovery features",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/README.md",
+      "to_component": "api-gateway-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.75,
+          "evidence": "- **api-gateway-service**: User profile endpoint",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.75
+    },
+    {
+      "from_component": "user-service/api.md",
+      "to_component": "security-service",
+      "signals": [
+        {
+          "source_type": "mention",
+          "confidence": 0.7,
+          "evidence": "# Service API",
+          "weight": 1
+        }
+      ],
+      "aggregated_confidence": 0.7
+    }
+  ]
+}
