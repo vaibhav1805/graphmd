@@ -1091,6 +1091,34 @@ func (db *Database) SaveComponentMentions(mentions []ComponentMention) error {
 	})
 }
 
+// LoadComponentMentions reads all component mentions from the database and
+// returns them grouped by component_id, sorted by confidence descending.
+func (db *Database) LoadComponentMentions() (map[string][]ComponentMention, error) {
+	result := make(map[string][]ComponentMention)
+
+	rows, err := db.conn.Query(
+		`SELECT component_id, file_path, heading_hierarchy, detected_by, confidence
+		 FROM component_mentions
+		 ORDER BY component_id, confidence DESC`)
+	if err != nil {
+		return result, fmt.Errorf("query component_mentions: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m ComponentMention
+		if err := rows.Scan(&m.ComponentID, &m.FilePath, &m.HeadingHierarchy, &m.DetectedBy, &m.Confidence); err != nil {
+			return result, fmt.Errorf("scan component_mention: %w", err)
+		}
+		result[m.ComponentID] = append(result[m.ComponentID], m)
+	}
+	if err := rows.Err(); err != nil {
+		return result, fmt.Errorf("iterate component_mentions: %w", err)
+	}
+
+	return result, nil
+}
+
 // ListComponentsByType returns all graph nodes with the given component type.
 func (db *Database) ListComponentsByType(ct ComponentType) ([]*Node, error) {
 	rows, err := db.conn.Query(

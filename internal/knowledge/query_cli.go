@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -109,10 +110,20 @@ type ImpactResult struct {
 
 // ImpactNode describes a node reached during impact or dependencies traversal.
 type ImpactNode struct {
-	Name           string `json:"name"`
-	Type           string `json:"type"`
-	Distance       int    `json:"distance"`
-	ConfidenceTier string `json:"confidence_tier"`
+	Name           string          `json:"name"`
+	Type           string          `json:"type"`
+	Distance       int             `json:"distance"`
+	ConfidenceTier string          `json:"confidence_tier"`
+	Mentions       []MentionDetail `json:"mentions,omitempty"`
+	MentionCount   int             `json:"mention_count,omitempty"`
+}
+
+// MentionDetail describes a single detection provenance record for JSON output.
+type MentionDetail struct {
+	FilePath        string  `json:"file_path"`
+	DetectionMethod string  `json:"detection_method"`
+	Confidence      float64 `json:"confidence"`
+	Context         string  `json:"context,omitempty"`
 }
 
 // --- Cycle detection types ---------------------------------------------------
@@ -173,6 +184,8 @@ func cmdQueryImpact(args []string) error {
 	minConf := fs.Float64("min-confidence", 0, "Minimum confidence threshold")
 	graphName := fs.String("graph", "", "Named graph to query")
 	format := fs.String("format", "json", "Output format: json or table")
+	includeProvenance := fs.Bool("include-provenance", false, "Include detection provenance (mentions) for each node")
+	maxMentions := fs.Int("max-mentions", 5, "Maximum mentions per component (0 = unlimited)")
 
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("query impact: %w", err)
@@ -204,6 +217,14 @@ func cmdQueryImpact(args []string) error {
 
 	// Impact = reverse traversal: follow ByTarget to find things that depend on this component.
 	affectedNodes, relationships, cycles := executeImpactReverse(g, *component, depth, minConf)
+
+	// Decorate with provenance if requested.
+	if *includeProvenance {
+		mentions := loadMentionsForGraph(*graphName)
+		if mentions != nil {
+			decorateWithMentions(affectedNodes, mentions, *maxMentions)
+		}
+	}
 
 	elapsed := time.Since(start).Milliseconds()
 
@@ -245,6 +266,8 @@ func cmdQueryDependencies(args []string) error {
 	minConf := fs.Float64("min-confidence", 0, "Minimum confidence threshold")
 	graphName := fs.String("graph", "", "Named graph to query")
 	format := fs.String("format", "json", "Output format: json or table")
+	includeProvenance := fs.Bool("include-provenance", false, "Include detection provenance (mentions) for each node")
+	maxMentions := fs.Int("max-mentions", 5, "Maximum mentions per component (0 = unlimited)")
 
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("query dependencies: %w", err)
@@ -276,6 +299,14 @@ func cmdQueryDependencies(args []string) error {
 
 	// Dependencies = forward traversal: follow BySource to find what this component depends on.
 	affectedNodes, relationships, cycles := executeForwardTraversal(g, *component, depth, minConf)
+
+	// Decorate with provenance if requested.
+	if *includeProvenance {
+		mentions := loadMentionsForGraph(*graphName)
+		if mentions != nil {
+			decorateWithMentions(affectedNodes, mentions, *maxMentions)
+		}
+	}
 
 	elapsed := time.Since(start).Milliseconds()
 
@@ -504,6 +535,68 @@ func cmdQueryList(args []string) error {
 	}
 
 	return outputEnvelopeSuccess(envelope, *format, "list")
+}
+
+// --- Mention decoration ------------------------------------------------------
+
+// decorateWithMentions attaches provenance data to impact/dependency nodes.
+// limit > 0 truncates mentions per node; limit == 0 means unlimited.
+func decorateWithMentions(nodes []ImpactNode, mentions map[string][]ComponentMention, limit int) {
+	for i := range nodes {
+		cms, ok := mentions[nodes[i].Name]
+		if !ok || len(cms) == 0 {
+			continue
+		}
+
+		nodes[i].MentionCount = len(cms)
+
+		// Apply limit.
+		toMap := cms
+		if limit > 0 && len(toMap) > limit {
+			toMap = toMap[:limit]
+		}
+
+		details := make([]MentionDetail, len(toMap))
+		for j, cm := range toMap {
+			details[j] = MentionDetail{
+				FilePath:        cm.FilePath,
+				DetectionMethod: cm.DetectedBy,
+				Confidence:      cm.Confidence,
+				Context:         cm.HeadingHierarchy,
+			}
+		}
+		nodes[i].Mentions = details
+	}
+}
+
+// loadMentionsForGraph opens the graph DB and loads component mentions.
+// Returns nil map on error (non-fatal; caller should continue without mentions).
+func loadMentionsForGraph(graphName string) map[string][]ComponentMention {
+	storageDir, err := GraphStorageDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: resolve storage dir for mentions: %v\n", err)
+		return nil
+	}
+	if graphName == "" {
+		graphName, err = getCurrentGraph(storageDir)
+		if err != nil {
+			return nil
+		}
+	}
+	dbPath := filepath.Join(storageDir, graphName, "graph.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: open DB for mentions: %v\n", err)
+		return nil
+	}
+	defer db.Close()
+
+	mentions, err := db.LoadComponentMentions()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: load mentions: %v\n", err)
+		return nil
+	}
+	return mentions
 }
 
 // --- Reverse traversal for impact queries ------------------------------------

@@ -149,3 +149,101 @@ func TestSaveGraph_DroppedEdgeMissingTarget(t *testing.T) {
 		t.Errorf("expected stderr to mention 'missing target', got: %q", output)
 	}
 }
+
+// --- LoadComponentMentions tests ---------------------------------------------
+
+func TestLoadComponentMentions(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "test.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		t.Fatalf("OpenDB: %v", err)
+	}
+	defer db.Close()
+
+	// Save a graph with components first (for FK references).
+	g := NewGraph()
+	_ = g.AddNode(&Node{ID: "svc-a", Type: "document", Title: "Service A", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "svc-b", Type: "document", Title: "Service B", ComponentType: ComponentTypeService})
+	if err := db.SaveGraph(g); err != nil {
+		t.Fatalf("SaveGraph: %v", err)
+	}
+
+	// Insert mentions for both components.
+	mentions := []ComponentMention{
+		{ComponentID: "svc-a", FilePath: "docs/arch.md", HeadingHierarchy: "Architecture > Services", DetectedBy: "explicit-link", Confidence: 0.95},
+		{ComponentID: "svc-a", FilePath: "docs/deploy.md", HeadingHierarchy: "Deployment", DetectedBy: "co-occurrence", Confidence: 0.70},
+		{ComponentID: "svc-a", FilePath: "docs/overview.md", HeadingHierarchy: "Overview", DetectedBy: "structural", Confidence: 0.85},
+		{ComponentID: "svc-b", FilePath: "docs/arch.md", HeadingHierarchy: "Architecture > Databases", DetectedBy: "explicit-link", Confidence: 0.90},
+		{ComponentID: "svc-b", FilePath: "docs/config.md", HeadingHierarchy: "Configuration", DetectedBy: "semantic", Confidence: 0.60},
+	}
+	if err := db.SaveComponentMentions(mentions); err != nil {
+		t.Fatalf("SaveComponentMentions: %v", err)
+	}
+
+	// Load mentions via the new method.
+	result, err := db.LoadComponentMentions()
+	if err != nil {
+		t.Fatalf("LoadComponentMentions: %v", err)
+	}
+
+	// Verify both components are present.
+	if len(result) != 2 {
+		t.Fatalf("expected 2 components in result, got %d", len(result))
+	}
+
+	// Verify svc-a has 3 mentions ordered by confidence DESC.
+	svcA := result["svc-a"]
+	if len(svcA) != 3 {
+		t.Fatalf("expected 3 mentions for svc-a, got %d", len(svcA))
+	}
+	if svcA[0].Confidence != 0.95 {
+		t.Errorf("expected first mention confidence 0.95, got %f", svcA[0].Confidence)
+	}
+	if svcA[1].Confidence != 0.85 {
+		t.Errorf("expected second mention confidence 0.85, got %f", svcA[1].Confidence)
+	}
+	if svcA[2].Confidence != 0.70 {
+		t.Errorf("expected third mention confidence 0.70, got %f", svcA[2].Confidence)
+	}
+
+	// Verify svc-b has 2 mentions ordered by confidence DESC.
+	svcB := result["svc-b"]
+	if len(svcB) != 2 {
+		t.Fatalf("expected 2 mentions for svc-b, got %d", len(svcB))
+	}
+	if svcB[0].Confidence != 0.90 {
+		t.Errorf("expected first mention confidence 0.90, got %f", svcB[0].Confidence)
+	}
+
+	// Verify fields are populated.
+	if svcA[0].FilePath != "docs/arch.md" {
+		t.Errorf("expected file_path 'docs/arch.md', got %q", svcA[0].FilePath)
+	}
+	if svcA[0].DetectedBy != "explicit-link" {
+		t.Errorf("expected detected_by 'explicit-link', got %q", svcA[0].DetectedBy)
+	}
+	if svcA[0].HeadingHierarchy != "Architecture > Services" {
+		t.Errorf("expected heading_hierarchy 'Architecture > Services', got %q", svcA[0].HeadingHierarchy)
+	}
+}
+
+func TestLoadComponentMentions_EmptyTable(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "test.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		t.Fatalf("OpenDB: %v", err)
+	}
+	defer db.Close()
+
+	result, err := db.LoadComponentMentions()
+	if err != nil {
+		t.Fatalf("LoadComponentMentions: %v", err)
+	}
+
+	if result == nil {
+		t.Fatal("expected non-nil empty map, got nil")
+	}
+	if len(result) != 0 {
+		t.Errorf("expected empty map, got %d entries", len(result))
+	}
+}

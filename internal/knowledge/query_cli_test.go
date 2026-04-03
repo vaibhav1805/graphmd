@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -736,6 +737,354 @@ func TestQueryImpact_CyclicGraph_RootNotFalselyCycleParticipant(t *testing.T) {
 	// On acyclic graph, no cycles should be reported at all (root not falsely reported).
 	if len(env.Metadata.CyclesDetected) != 0 {
 		t.Errorf("root node should not be falsely reported as cycle participant on acyclic graph, got %d cycles", len(env.Metadata.CyclesDetected))
+	}
+}
+
+// --- Provenance tests --------------------------------------------------------
+
+// setupProvenanceQueryTestGraph creates a test graph with component_mentions populated.
+// Uses the same graph structure as setupQueryTestGraph but adds mention data.
+func setupProvenanceQueryTestGraph(t *testing.T) {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	xdgDir := filepath.Join(tmpDir, "xdg")
+	t.Setenv("XDG_DATA_HOME", xdgDir)
+
+	buildDir := filepath.Join(tmpDir, "build")
+	os.MkdirAll(buildDir, 0o755)
+
+	g := NewGraph()
+	_ = g.AddNode(&Node{ID: "payment-api", Title: "Payment API", Type: "document", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "primary-db", Title: "Primary DB", Type: "document", ComponentType: ComponentTypeDatabase})
+	_ = g.AddNode(&Node{ID: "redis-cache", Title: "Redis Cache", Type: "document", ComponentType: ComponentTypeCache})
+	_ = g.AddNode(&Node{ID: "auth-service", Title: "Auth Service", Type: "document", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "web-frontend", Title: "Web Frontend", Type: "document", ComponentType: ComponentTypeService})
+
+	edges := []*Edge{
+		{ID: "payment-api->primary-db", Source: "payment-api", Target: "primary-db", Type: EdgeDependsOn, Confidence: 0.95, SourceFile: "payment-api.md", ExtractionMethod: "explicit-link"},
+		{ID: "payment-api->redis-cache", Source: "payment-api", Target: "redis-cache", Type: EdgeDependsOn, Confidence: 0.85, SourceFile: "payment-api.md", ExtractionMethod: "co-occurrence"},
+		{ID: "auth-service->primary-db", Source: "auth-service", Target: "primary-db", Type: EdgeDependsOn, Confidence: 0.90, SourceFile: "auth-service.md", ExtractionMethod: "structural"},
+		{ID: "auth-service->payment-api", Source: "auth-service", Target: "payment-api", Type: EdgeDependsOn, Confidence: 0.70, SourceFile: "auth-service.md", ExtractionMethod: "semantic"},
+		{ID: "web-frontend->auth-service", Source: "web-frontend", Target: "auth-service", Type: EdgeDependsOn, Confidence: 0.80, SourceFile: "web-frontend.md", ExtractionMethod: "explicit-link"},
+		{ID: "web-frontend->payment-api", Source: "web-frontend", Target: "payment-api", Type: EdgeDependsOn, Confidence: 0.75, SourceFile: "web-frontend.md", ExtractionMethod: "co-occurrence"},
+	}
+	for _, e := range edges {
+		_ = g.AddEdge(e)
+	}
+
+	// Save to SQLite and add component_mentions.
+	dbPath := filepath.Join(buildDir, "graph.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	if err := db.SaveGraph(g); err != nil {
+		t.Fatalf("save graph: %v", err)
+	}
+
+	// Insert component mentions.
+	mentions := []ComponentMention{
+		{ComponentID: "payment-api", FilePath: "docs/payment.md", HeadingHierarchy: "Payment > API", DetectedBy: "explicit-link", Confidence: 0.95},
+		{ComponentID: "payment-api", FilePath: "docs/arch.md", HeadingHierarchy: "Architecture", DetectedBy: "co-occurrence", Confidence: 0.80},
+		{ComponentID: "auth-service", FilePath: "docs/auth.md", HeadingHierarchy: "Auth > Service", DetectedBy: "structural", Confidence: 0.90},
+		{ComponentID: "auth-service", FilePath: "docs/security.md", HeadingHierarchy: "Security", DetectedBy: "semantic", Confidence: 0.75},
+		{ComponentID: "primary-db", FilePath: "docs/database.md", HeadingHierarchy: "Database", DetectedBy: "explicit-link", Confidence: 0.92},
+		{ComponentID: "web-frontend", FilePath: "docs/frontend.md", HeadingHierarchy: "Frontend", DetectedBy: "explicit-link", Confidence: 0.88},
+	}
+	if err := db.SaveComponentMentions(mentions); err != nil {
+		t.Fatalf("save mentions: %v", err)
+	}
+	db.Close()
+
+	// Create metadata.
+	meta := ExportMetadata{
+		Version:           "1.0.0",
+		SchemaVersion:     SchemaVersion,
+		CreatedAt:         "2026-03-29T00:00:00Z",
+		ComponentCount:    5,
+		RelationshipCount: 6,
+		InputPath:         "/test",
+	}
+	metaJSON, _ := json.MarshalIndent(meta, "", "  ")
+
+	// Package as ZIP.
+	zipPath := filepath.Join(buildDir, "prov-test.zip")
+	zf, _ := os.Create(zipPath)
+	zw := zip.NewWriter(zf)
+	dbData, _ := os.ReadFile(dbPath)
+	w, _ := zw.Create("graph.db")
+	w.Write(dbData)
+	w, _ = zw.Create("metadata.json")
+	w.Write(metaJSON)
+	zw.Close()
+	zf.Close()
+
+	// Import.
+	if err := ImportZIP(zipPath, "prov-test"); err != nil {
+		t.Fatalf("ImportZIP: %v", err)
+	}
+}
+
+// setupProvenanceQueryTestGraphManyMentions creates a graph where one component
+// has 8 mentions, for testing --max-mentions truncation.
+func setupProvenanceQueryTestGraphManyMentions(t *testing.T) {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	xdgDir := filepath.Join(tmpDir, "xdg")
+	t.Setenv("XDG_DATA_HOME", xdgDir)
+
+	buildDir := filepath.Join(tmpDir, "build")
+	os.MkdirAll(buildDir, 0o755)
+
+	g := NewGraph()
+	_ = g.AddNode(&Node{ID: "payment-api", Title: "Payment API", Type: "document", ComponentType: ComponentTypeService})
+	_ = g.AddNode(&Node{ID: "primary-db", Title: "Primary DB", Type: "document", ComponentType: ComponentTypeDatabase})
+
+	_ = g.AddEdge(&Edge{ID: "payment-api->primary-db", Source: "payment-api", Target: "primary-db", Type: EdgeDependsOn, Confidence: 0.95, SourceFile: "payment-api.md", ExtractionMethod: "explicit-link"})
+
+	dbPath := filepath.Join(buildDir, "graph.db")
+	db, err := OpenDB(dbPath)
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	if err := db.SaveGraph(g); err != nil {
+		t.Fatalf("save graph: %v", err)
+	}
+
+	// Insert 8 mentions for payment-api.
+	var mentions []ComponentMention
+	for i := 0; i < 8; i++ {
+		mentions = append(mentions, ComponentMention{
+			ComponentID:      "payment-api",
+			FilePath:         fmt.Sprintf("docs/file%d.md", i),
+			HeadingHierarchy: fmt.Sprintf("Section %d", i),
+			DetectedBy:       "explicit-link",
+			Confidence:       0.90 - float64(i)*0.05,
+		})
+	}
+	if err := db.SaveComponentMentions(mentions); err != nil {
+		t.Fatalf("save mentions: %v", err)
+	}
+	db.Close()
+
+	meta := ExportMetadata{
+		Version:           "1.0.0",
+		SchemaVersion:     SchemaVersion,
+		CreatedAt:         "2026-03-29T00:00:00Z",
+		ComponentCount:    2,
+		RelationshipCount: 1,
+		InputPath:         "/test",
+	}
+	metaJSON, _ := json.MarshalIndent(meta, "", "  ")
+
+	zipPath := filepath.Join(buildDir, "prov-many-test.zip")
+	zf, _ := os.Create(zipPath)
+	zw := zip.NewWriter(zf)
+	dbData, _ := os.ReadFile(dbPath)
+	w, _ := zw.Create("graph.db")
+	w.Write(dbData)
+	w, _ = zw.Create("metadata.json")
+	w.Write(metaJSON)
+	zw.Close()
+	zf.Close()
+
+	if err := ImportZIP(zipPath, "prov-many-test"); err != nil {
+		t.Fatalf("ImportZIP: %v", err)
+	}
+}
+
+func TestQueryImpact_WithProvenance(t *testing.T) {
+	setupProvenanceQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--include-provenance", "--graph", "prov-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact with provenance: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	resultsJSON, _ := json.Marshal(env.Results)
+	var raw map[string]json.RawMessage
+	json.Unmarshal(resultsJSON, &raw)
+
+	var nodes []json.RawMessage
+	json.Unmarshal(raw["affected_nodes"], &nodes)
+
+	if len(nodes) == 0 {
+		t.Fatal("expected affected nodes")
+	}
+
+	// Check first node has mentions.
+	for _, nodeJSON := range nodes {
+		var node map[string]interface{}
+		json.Unmarshal(nodeJSON, &node)
+
+		mentionsRaw, hasMentions := node["mentions"]
+		if !hasMentions {
+			t.Errorf("node %v missing 'mentions' field", node["name"])
+			continue
+		}
+
+		mentionsList, ok := mentionsRaw.([]interface{})
+		if !ok || len(mentionsList) == 0 {
+			t.Errorf("node %v has empty or invalid mentions", node["name"])
+			continue
+		}
+
+		// Verify mention fields.
+		firstMention, _ := mentionsList[0].(map[string]interface{})
+		for _, field := range []string{"file_path", "detection_method", "confidence"} {
+			if _, ok := firstMention[field]; !ok {
+				t.Errorf("mention missing field %q", field)
+			}
+		}
+
+		// Verify mention_count is present.
+		if _, hasMentionCount := node["mention_count"]; !hasMentionCount {
+			t.Errorf("node %v missing 'mention_count' field", node["name"])
+		}
+	}
+}
+
+func TestQueryImpact_WithoutProvenance(t *testing.T) {
+	setupProvenanceQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--graph", "prov-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact without provenance: %v", err)
+		}
+	})
+
+	// Verify no mentions or mention_count fields in output.
+	if strings.Contains(output, "mentions") {
+		t.Error("output should NOT contain 'mentions' when --include-provenance is not set")
+	}
+	if strings.Contains(output, "mention_count") {
+		t.Error("output should NOT contain 'mention_count' when --include-provenance is not set")
+	}
+}
+
+func TestQueryDependencies_WithProvenance(t *testing.T) {
+	setupProvenanceQueryTestGraph(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"dependencies", "--component", "web-frontend", "--include-provenance", "--graph", "prov-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery dependencies with provenance: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	resultsJSON, _ := json.Marshal(env.Results)
+	var raw map[string]json.RawMessage
+	json.Unmarshal(resultsJSON, &raw)
+
+	var nodes []json.RawMessage
+	json.Unmarshal(raw["affected_nodes"], &nodes)
+
+	if len(nodes) == 0 {
+		t.Fatal("expected affected nodes in dependencies query")
+	}
+
+	// Check that at least one node has mentions.
+	hasMentions := false
+	for _, nodeJSON := range nodes {
+		var node map[string]interface{}
+		json.Unmarshal(nodeJSON, &node)
+		if _, ok := node["mentions"]; ok {
+			hasMentions = true
+			break
+		}
+	}
+	if !hasMentions {
+		t.Error("expected at least one node with mentions in dependencies query")
+	}
+}
+
+func TestQueryImpact_MaxMentions(t *testing.T) {
+	setupProvenanceQueryTestGraphManyMentions(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--include-provenance", "--max-mentions", "3", "--graph", "prov-many-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact with max-mentions: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	resultsJSON, _ := json.Marshal(env.Results)
+	var raw map[string]json.RawMessage
+	json.Unmarshal(resultsJSON, &raw)
+
+	var nodes []json.RawMessage
+	json.Unmarshal(raw["affected_nodes"], &nodes)
+
+	// payment-api depends on primary-db, so it should appear.
+	for _, nodeJSON := range nodes {
+		var node map[string]interface{}
+		json.Unmarshal(nodeJSON, &node)
+
+		if node["name"] == "payment-api" {
+			mentionsList, _ := node["mentions"].([]interface{})
+			if len(mentionsList) != 3 {
+				t.Errorf("expected 3 mentions (limited by --max-mentions), got %d", len(mentionsList))
+			}
+			mentionCount, _ := node["mention_count"].(float64)
+			if int(mentionCount) != 8 {
+				t.Errorf("expected mention_count=8 (total before truncation), got %d", int(mentionCount))
+			}
+		}
+	}
+}
+
+func TestQueryImpact_MaxMentionsZero(t *testing.T) {
+	setupProvenanceQueryTestGraphManyMentions(t)
+
+	output := captureQueryOutput(t, func() {
+		err := CmdQuery([]string{"impact", "--component", "primary-db", "--include-provenance", "--max-mentions", "0", "--graph", "prov-many-test"})
+		if err != nil {
+			t.Fatalf("CmdQuery impact with max-mentions=0: %v", err)
+		}
+	})
+
+	var env QueryEnvelope
+	if err := json.Unmarshal([]byte(output), &env); err != nil {
+		t.Fatalf("unmarshal: %v\noutput: %s", err, output)
+	}
+
+	resultsJSON, _ := json.Marshal(env.Results)
+	var raw map[string]json.RawMessage
+	json.Unmarshal(resultsJSON, &raw)
+
+	var nodes []json.RawMessage
+	json.Unmarshal(raw["affected_nodes"], &nodes)
+
+	for _, nodeJSON := range nodes {
+		var node map[string]interface{}
+		json.Unmarshal(nodeJSON, &node)
+
+		if node["name"] == "payment-api" {
+			mentionsList, _ := node["mentions"].([]interface{})
+			if len(mentionsList) != 8 {
+				t.Errorf("expected all 8 mentions (max-mentions=0 means unlimited), got %d", len(mentionsList))
+			}
+		}
 	}
 }
 
