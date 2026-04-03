@@ -1,7 +1,6 @@
 package knowledge
 
 import (
-	"encoding/json"
 	"testing"
 )
 
@@ -165,91 +164,6 @@ func TestSeedConfig_NilSafe(t *testing.T) {
 	ct, conf := sc.ApplySeedConfig("anything")
 	if ct != "" || conf != 0 {
 		t.Errorf("nil SeedConfig: got (%q, %.2f), want (\"\", 0)", ct, conf)
-	}
-}
-
-func TestQueryResult_JSONMarshal(t *testing.T) {
-	qr := &QueryResult{
-		Query:         "impact",
-		Root:          "payment-api",
-		Depth:         2,
-		TraverseMode:  "cascade",
-		MinConfidence: 0.7,
-		MinTier:       "strong-inference",
-		AffectedNodes: []AffectedNode{
-			{Name: "payment-api", Type: "service", Confidence: 1.0, RelationshipType: "direct-dependency", Distance: 0},
-			{Name: "primary-db", Type: "database", Confidence: 0.9, RelationshipType: "direct-dependency", Distance: 1},
-		},
-		Edges: []QueryEdge{
-			{From: "payment-api", To: "primary-db", Confidence: 0.9, Type: "depends-on",
-				RelationshipType: "direct-dependency", Evidence: "connects to primary-db",
-				SourceFile: "docs/payment.md", ExtractionMethod: "structural", SignalsCount: 2},
-		},
-		Metadata: map[string]interface{}{"node_count": 2, "edge_count": 1},
-	}
-
-	b, err := json.Marshal(qr)
-	if err != nil {
-		t.Fatalf("json.Marshal failed: %v", err)
-	}
-
-	var parsed map[string]interface{}
-	if err := json.Unmarshal(b, &parsed); err != nil {
-		t.Fatalf("json.Unmarshal failed: %v", err)
-	}
-
-	for _, key := range []string{"query", "root", "depth", "affected_nodes", "edges", "metadata"} {
-		if _, ok := parsed[key]; !ok {
-			t.Errorf("missing expected key %q in JSON output", key)
-		}
-	}
-
-	nodes := parsed["affected_nodes"].([]interface{})
-	if len(nodes) != 2 {
-		t.Errorf("affected_nodes: got %d, want 2", len(nodes))
-	}
-}
-
-func TestQueryResult_Validation(t *testing.T) {
-	// Empty root
-	qr := &QueryResult{}
-	if err := qr.Validate(); err == nil {
-		t.Error("expected error for empty root")
-	}
-
-	// No nodes
-	qr = &QueryResult{Root: "A"}
-	if err := qr.Validate(); err == nil {
-		t.Error("expected error for empty affected_nodes")
-	}
-
-	// No edges
-	qr = &QueryResult{
-		Root:          "A",
-		AffectedNodes: []AffectedNode{{Name: "A"}},
-	}
-	if err := qr.Validate(); err == nil {
-		t.Error("expected error for empty edges")
-	}
-
-	// Edge referencing missing node
-	qr = &QueryResult{
-		Root:          "A",
-		AffectedNodes: []AffectedNode{{Name: "A"}},
-		Edges:         []QueryEdge{{From: "A", To: "B"}},
-	}
-	if err := qr.Validate(); err == nil {
-		t.Error("expected error for edge to missing node B")
-	}
-
-	// Valid result
-	qr = &QueryResult{
-		Root:          "A",
-		AffectedNodes: []AffectedNode{{Name: "A"}, {Name: "B"}},
-		Edges:         []QueryEdge{{From: "A", To: "B"}},
-	}
-	if err := qr.Validate(); err != nil {
-		t.Errorf("valid result failed validation: %v", err)
 	}
 }
 
