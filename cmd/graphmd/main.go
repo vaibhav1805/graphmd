@@ -38,6 +38,10 @@ func main() {
 		cmdGraph()
 	case "export":
 		cmdExport()
+	case "import":
+		cmdImport()
+	case "query":
+		cmdQueryMain()
 	case "clean":
 		cmdClean()
 	case "discover":
@@ -652,6 +656,20 @@ func cmdExport() {
 	}
 }
 
+func cmdImport() {
+	if err := knowledge.CmdImport(os.Args[2:]); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func cmdQueryMain() {
+	if err := knowledge.CmdQuery(os.Args[2:]); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 func cmdClean() {
 	fs := flag.NewFlagSet("clean", flag.ExitOnError)
 	dir := fs.String("dir", ".", "Directory to clean")
@@ -693,7 +711,12 @@ Commands:
   context         Assemble RAG context for a query
   relationships   List discovered relationships with confidence scores
   graph           Export the full dependency graph
-  export          Package knowledge as a tar.gz archive
+  export          Package knowledge as a ZIP archive
+  import          Load an exported graph ZIP into persistent storage
+  query impact    Query downstream impact of a component failure
+  query deps      Query what a component depends on
+  query path      Find paths between two components
+  query list      List components with optional filters
   clean           Remove all BMD artifacts from directory
   discover        Run semantic discovery (experimental)
   help            Show this help message
@@ -708,6 +731,13 @@ Examples:
   graphmd context "how does auth work" --dir ./docs
   graphmd relationships --dir ./docs --min-confidence 0.8
   graphmd graph --dir ./docs --format dot
+  graphmd export --input ./docs --output graph.zip
+  graphmd import graph.zip --name prod-infra
+  graphmd query impact --component payment-api
+  graphmd query dependencies --component web-frontend --depth all
+  graphmd query path --from web-frontend --to primary-db
+  graphmd query list --type service --min-confidence 0.7
 
 `)
+
 }

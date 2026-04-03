@@ -1,7 +1,7 @@
 # Project State: graphmd v1
 
-**Last updated:** 2026-03-19
-**Current phase:** Phase 4 - Import & Query Pipeline (0/3 plans complete)
+**Last updated:** 2026-03-23
+**Current phase:** Phase 4 - Import & Query Pipeline (2/3 plans complete)
 **Status:** In progress
 
 ## Phase Progress
@@ -11,24 +11,24 @@
 | 1 | Component Model | Complete (3/3 plans) | COMP-01, COMP-02, COMP-03 | 3/3 |
 | 2 | Accuracy Foundation | Complete (5/5 plans) | REL-01, REL-02, REL-03, REL-04, REL-05 | 5/5 |
 | 3 | Extract & Export Pipeline | Complete (2/2 plans) | EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02 | 2/2 |
-| 4 | Import & Query Pipeline | Not started | IMPORT-01, IMPORT-02, IMPORT-03 | 0/3 |
+| 4 | Import & Query Pipeline | In progress (2/3 plans) | IMPORT-01, IMPORT-02, IMPORT-03 | 2/3 |
 | 5 | Crawl Exploration | Not started | CRAWL-01, CRAWL-02 | 0/2 |
 
 ## Overall Progress
 
 - **Total requirements:** 18
-- **Completed:** 13 (COMP-01, COMP-02, COMP-03, REL-05, REL-01, REL-02, REL-03, REL-04, EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02)
+- **Completed:** 16 (COMP-01, COMP-02, COMP-03, REL-05, REL-01, REL-02, REL-03, REL-04, EXTRACT-01, EXTRACT-02, EXTRACT-03, EXPORT-01, EXPORT-02, IMPORT-01, IMPORT-02, IMPORT-03)
 - **In progress:** 0
-- **Not started:** 5
-- **Completion:** 72%
+- **Not started:** 2
+- **Completion:** 89%
 
 ## Current Focus
 
-Phase 3 complete (2/2 plans). Export pipeline produces ZIP with graph.db + metadata.json.
+Phase 4 in progress (2/3 plans). Query CLI delivers the core product: impact, dependencies, path, and list queries.
 
 ### Next Actions
 
-1. Phase 4, Plan 1: Import pipeline implementation
+1. Phase 4, Plan 3: Integration tests and end-to-end validation
 
 ## Decisions Log
 
@@ -61,6 +61,12 @@ Phase 3 complete (2/2 plans). Export pipeline produces ZIP with graph.db + metad
 | 2026-03-19 | KnowledgeMetadata and tar helpers retained for backward compat | Legacy import pipeline (importtar.go) still uses tar.gz format |
 | 2026-03-19 | --input flag as alias for --from in export command | Clearer CLI semantics matching success criteria |
 | 2026-03-19 | Export pipeline builds graph directly (no buildIndex) | Avoids double-processing; pipeline composes scan+detect+discover+save |
+| 2026-03-23 | XDG_DATA_HOME with ~/.local/share fallback for graph storage | Cross-platform persistent storage for imported graphs |
+| 2026-03-23 | Current graph tracked via plain text marker file | Simple, no DB dependency for tracking most recent import |
+| 2026-03-23 | Full DB validation on import before committing to storage | Reject corrupt archives early with clear error messages |
+| 2026-03-23 | Impact uses reverse BFS (ByTarget) for correct "what breaks?" semantics | Forward traversal would answer "what does X depend on?" which is dependencies, not impact |
+| 2026-03-23 | No-path-found returns exit 0 with reason field | Empty results are valid outcomes, not errors |
+| 2026-03-23 | Word-level overlap scoring in fuzzy component matching | Better suggestions when query shares word parts with component names |
 
 ## Blockers
 
@@ -90,7 +96,9 @@ None.
 | 02-05 | Query Interface | 8 min | 3 | 4 |
 | 03-01 | Extract Foundations | 2 min | 2 | 7 |
 | 03-02 | Export Pipeline | 5 min | 2 | 4 |
+| 04-01 | Import Pipeline | 3 min | 2 | 4 |
+| 04-02 | Query CLI | 5 min | 2 | 3 |
 
 ---
 *Initialized: 2026-03-16*
-*Last plan completed: 03-02 Export Pipeline (2026-03-19)*
+*Last plan completed: 04-02 Query CLI (2026-03-23)*

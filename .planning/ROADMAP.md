@@ -142,13 +142,14 @@
 4. **Machine-readable output:** All query results are valid JSON (parseable by `jq .`) with consistent schema: `{components: [...], relationships: [...], metadata: {...}}`.
 5. **Provenance in results:** Each relationship in query output includes `source_file`, `extraction_method`, and `confidence` fields.
 
+**Plans:** 2 plans
+
 ### Plans
 
-1. Implement `import` CLI command wrapping existing ImportKnowledgeTar
-2. Build query router: impact / dependencies / path / list subcommands
-3. Implement impact analysis with depth-limited transitive traversal and cycle detection
-4. Implement shortest-path query between two components
-5. Add JSON output formatter with consistent schema for all query types
+| # | Plan | Status |
+|---|------|--------|
+| 1 | Import pipeline: ZIP extraction, XDG storage, named graphs, schema validation | Not started |
+| 2 | Query router: impact, dependencies, path, list subcommands with JSON envelope | Not started |
 
 ---
 

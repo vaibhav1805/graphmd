@@ -31,13 +31,13 @@ Dependency graph export/import pipeline with accurate relationship inference fro
 
 ### Import & Query Pipeline (Production)
 
-- [ ] **IMPORT-01**: Implement `import` command: unzip → load SQLite → validate schema
-- [ ] **IMPORT-02**: CLI query interface for four core patterns:
+- [x] **IMPORT-01**: Implement `import` command: unzip → load SQLite → validate schema
+- [x] **IMPORT-02**: CLI query interface for four core patterns:
   - Impact analysis: "if component X fails, what breaks?" (transitive closure, excludes cycles)
   - Dependencies: "what does component X depend on?" (direct edges only)
   - Path: "what's the connection between X and Y?" (shortest path)
   - List: "list all components of type T"
-- [ ] **IMPORT-03**: Return results with confidence scores and metadata (provenance)
+- [x] **IMPORT-03**: Return results with confidence scores and metadata (provenance)
 
 ### Local Exploration
 
