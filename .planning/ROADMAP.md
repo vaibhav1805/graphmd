@@ -37,7 +37,7 @@
 **Milestone Goal:** Add code-based dependency detection (Go, Python, JS/TS) and an MCP server so LLM agents can query graphs directly via tool use.
 
 - [ ] **Phase 9: Code Analysis Foundation** - CodeSignal type, LanguageParser interface, Go parser with import/HTTP/DB/queue/cache detection
-- [ ] **Phase 10: Python + JS/TS Parsers** - Python and JavaScript/TypeScript parsers validating the LanguageParser interface generalizes
+- [x] **Phase 10: Python + JS/TS Parsers** - Python and JavaScript/TypeScript parsers validating the LanguageParser interface generalizes (completed 2026-03-31)
 - [ ] **Phase 11: Connection Strings + Comment Analysis** - Cross-language connection string parsing and code comment dependency extraction
 - [ ] **Phase 12: Signal Integration** - Schema v6 migration, code as 5th discovery source, confidence-weighted signal merging with provenance
 - [ ] **Phase 13: MCP Server** - MCP server with stdio transport wrapping query interface as 5 tools for LLM agent access
@@ -67,7 +67,11 @@ Plans:
   2. Running code analysis on a JS/TS project detects imports, HTTP calls (fetch/axios), DB connections (pg/mysql2/mongoose), queue clients, and cache clients
   3. Both parsers implement the same LanguageParser interface as the Go parser without interface changes
   4. False positives from regex-based detection are controlled via context filtering (comments, test files excluded) and confidence scoring below 0.5 for import-only detections
-**Plans**: TBD
+**Plans:** 3/3 plans complete
+Plans:
+- [ ] 10-01-PLAN.md — Python parser with TDD (HTTP, DB, cache, queue detection)
+- [ ] 10-02-PLAN.md — JS/TS parser with TDD (HTTP, DB, cache, queue detection)
+- [ ] 10-03-PLAN.md — Integration (register parsers, extend InferSourceComponent, extend skipDirs)
 
 ### Phase 11: Connection Strings + Comment Analysis
 **Goal**: Code analysis extracts dependency targets from connection strings, URLs, DSNs, and code comments across all supported languages
@@ -119,7 +123,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13
 | 7. Silent Loss Reporting | v1.1 | 2 | Complete | 2026-03-29 |
 | 8. Provenance Access | v1.1 | 1 | Complete | 2026-03-29 |
 | 9. Code Analysis Foundation | v2.0 | 2 | Planning complete | - |
-| 10. Python + JS/TS Parsers | v2.0 | TBD | Not started | - |
+| 10. Python + JS/TS Parsers | 3/3 | Complete   | 2026-03-31 | - |
 | 11. Connection Strings + Comment Analysis | v2.0 | TBD | Not started | - |
 | 12. Signal Integration | v2.0 | TBD | Not started | - |
 | 13. MCP Server | v2.0 | TBD | Not started | - |

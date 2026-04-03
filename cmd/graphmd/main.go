@@ -11,6 +11,8 @@ import (
 
 	"github.com/graphmd/graphmd/internal/code"
 	"github.com/graphmd/graphmd/internal/code/goparser"
+	"github.com/graphmd/graphmd/internal/code/jsparser"
+	"github.com/graphmd/graphmd/internal/code/pyparser"
 	"github.com/graphmd/graphmd/internal/knowledge"
 )
 
@@ -178,7 +180,11 @@ func cmdIndex() {
 	// Run code analysis if requested.
 	if *analyzeCode {
 		fmt.Fprintf(os.Stderr, "Analyzing source code...\n")
-		signals, codeErr := code.RunCodeAnalysis(absDir, goparser.NewGoParser())
+		signals, codeErr := code.RunCodeAnalysis(absDir,
+			goparser.NewGoParser(),
+			pyparser.NewPythonParser(),
+			jsparser.NewJSParser(),
+		)
 		if codeErr != nil {
 			fmt.Fprintf(os.Stderr, "Warning: code analysis failed: %v\n", codeErr)
 		} else {

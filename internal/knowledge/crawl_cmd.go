@@ -13,6 +13,8 @@ import (
 
 	"github.com/graphmd/graphmd/internal/code"
 	"github.com/graphmd/graphmd/internal/code/goparser"
+	"github.com/graphmd/graphmd/internal/code/jsparser"
+	"github.com/graphmd/graphmd/internal/code/pyparser"
 )
 
 // ErrLegacyCrawl is a sentinel error returned by CmdCrawl when the
@@ -148,7 +150,11 @@ func CmdCrawl(args []string) error {
 	// Step 7b: Run code analysis if requested (only for directories, not ZIPs).
 	if a.AnalyzeCode {
 		fmt.Fprintf(os.Stderr, "  Analyzing source code...\n")
-		signals, codeErr := code.RunCodeAnalysis(absInput, goparser.NewGoParser())
+		signals, codeErr := code.RunCodeAnalysis(absInput,
+			goparser.NewGoParser(),
+			pyparser.NewPythonParser(),
+			jsparser.NewJSParser(),
+		)
 		if codeErr != nil {
 			fmt.Fprintf(os.Stderr, "  Warning: code analysis failed: %v\n", codeErr)
 		} else {

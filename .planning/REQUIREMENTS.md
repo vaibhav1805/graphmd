@@ -10,8 +10,8 @@ Code analysis integration and MCP server for LLM agent access.
 ### Code Analysis
 
 - [x] **CODE-01**: Go language parser detecting imports, HTTP client calls, database connections, message queue producers/consumers, and cache client usage
-- [ ] **CODE-02**: Python language parser detecting imports, HTTP calls (requests/httpx), DB connections (SQLAlchemy/psycopg), queue clients (kafka/pika/boto3 SQS), and cache clients (redis/memcache)
-- [ ] **CODE-03**: JavaScript/TypeScript language parser detecting imports, HTTP calls (fetch/axios), DB connections (pg/mysql2/mongoose), queue clients, and cache clients
+- [x] **CODE-02**: Python language parser detecting imports, HTTP calls (requests/httpx), DB connections (SQLAlchemy/psycopg), queue clients (kafka/pika/boto3 SQS), and cache clients (redis/memcache)
+- [x] **CODE-03**: JavaScript/TypeScript language parser detecting imports, HTTP calls (fetch/axios), DB connections (pg/mysql2/mongoose), queue clients, and cache clients
 - [ ] **CODE-04**: Connection string detection and parsing across all languages — URLs, DSNs, environment variable references, config file patterns
 - [ ] **CODE-05**: Code comment analysis extracting dependency hints and component references from inline comments and docstrings
 

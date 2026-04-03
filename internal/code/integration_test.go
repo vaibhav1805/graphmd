@@ -8,6 +8,8 @@ import (
 
 	"github.com/graphmd/graphmd/internal/code"
 	"github.com/graphmd/graphmd/internal/code/goparser"
+	"github.com/graphmd/graphmd/internal/code/jsparser"
+	"github.com/graphmd/graphmd/internal/code/pyparser"
 )
 
 func TestRunCodeAnalysis(t *testing.T) {
@@ -152,5 +154,185 @@ func TestPrintCodeSignalsSummaryEmpty(t *testing.T) {
 	output := buf.String()
 	if output == "" {
 		t.Fatal("expected non-empty output for zero signals")
+	}
+}
+
+func TestRunCodeAnalysisPython(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// pyproject.toml
+	pyproject := `[project]
+name = "my-python-svc"
+version = "1.0.0"
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "pyproject.toml"), []byte(pyproject), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Python file with HTTP call
+	pyFile := `import requests
+
+def call_payment():
+    requests.get("http://payment-api:8080/pay")
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "client.py"), []byte(pyFile), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	signals, err := code.RunCodeAnalysis(tmpDir, pyparser.NewPythonParser())
+	if err != nil {
+		t.Fatalf("RunCodeAnalysis failed: %v", err)
+	}
+
+	if len(signals) < 1 {
+		t.Fatalf("expected at least 1 signal, got %d", len(signals))
+	}
+
+	found := false
+	for _, s := range signals {
+		if s.Language == "python" && s.DetectionKind == "http_call" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected python http_call signal, got: %+v", signals)
+	}
+}
+
+func TestRunCodeAnalysisJavaScript(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// package.json
+	pkgJSON := `{"name": "my-js-svc", "version": "1.0.0"}`
+	if err := os.WriteFile(filepath.Join(tmpDir, "package.json"), []byte(pkgJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// JS file with HTTP call
+	jsFile := `import axios from 'axios';
+
+async function getOrders() {
+    await axios.get("http://order-api:3000/orders");
+}
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "client.js"), []byte(jsFile), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	signals, err := code.RunCodeAnalysis(tmpDir, jsparser.NewJSParser())
+	if err != nil {
+		t.Fatalf("RunCodeAnalysis failed: %v", err)
+	}
+
+	if len(signals) < 1 {
+		t.Fatalf("expected at least 1 signal, got %d", len(signals))
+	}
+
+	found := false
+	for _, s := range signals {
+		if s.Language == "javascript" && s.DetectionKind == "http_call" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected javascript http_call signal, got: %+v", signals)
+	}
+}
+
+func TestRunCodeAnalysisMultiLanguage(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// go.mod
+	goMod := `module github.com/example/multi
+
+go 1.25.0
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Go file
+	goFile := `package main
+
+import "net/http"
+
+func main() {
+	http.Get("http://go-api/data")
+}
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "main.go"), []byte(goFile), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Python file
+	pyFile := `import requests
+
+requests.post("http://py-api:5000/submit")
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "app.py"), []byte(pyFile), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// JS file
+	jsFile := `import axios from 'axios';
+
+axios.get("http://js-api:3000/items");
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "index.js"), []byte(jsFile), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	signals, err := code.RunCodeAnalysis(tmpDir,
+		goparser.NewGoParser(),
+		pyparser.NewPythonParser(),
+		jsparser.NewJSParser(),
+	)
+	if err != nil {
+		t.Fatalf("RunCodeAnalysis failed: %v", err)
+	}
+
+	// Check that we have signals from all three languages
+	langs := make(map[string]bool)
+	for _, s := range signals {
+		langs[s.Language] = true
+	}
+
+	for _, lang := range []string{"go", "python", "javascript"} {
+		if !langs[lang] {
+			t.Errorf("expected signals from %s language, got languages: %v", lang, langs)
+		}
+	}
+}
+
+func TestInferSourceComponentPython(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	pyproject := `[project]
+name = "my-py-app"
+version = "0.1.0"
+`
+	if err := os.WriteFile(filepath.Join(tmpDir, "pyproject.toml"), []byte(pyproject), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	source := code.InferSourceComponent(tmpDir)
+	if source != "my-py-app" {
+		t.Errorf("expected 'my-py-app', got %q", source)
+	}
+}
+
+func TestInferSourceComponentJS(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	pkgJSON := `{"name": "my-js-app", "version": "1.0.0"}`
+	if err := os.WriteFile(filepath.Join(tmpDir, "package.json"), []byte(pkgJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	source := code.InferSourceComponent(tmpDir)
+	if source != "my-js-app" {
+		t.Errorf("expected 'my-js-app', got %q", source)
 	}
 }

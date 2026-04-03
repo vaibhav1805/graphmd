@@ -18,6 +18,8 @@ import (
 
 	"github.com/graphmd/graphmd/internal/code"
 	"github.com/graphmd/graphmd/internal/code/goparser"
+	"github.com/graphmd/graphmd/internal/code/jsparser"
+	"github.com/graphmd/graphmd/internal/code/pyparser"
 )
 
 // ExportArgs holds parsed arguments for CmdExport.
@@ -225,7 +227,11 @@ func CmdExport(args []string) error {
 	// Step 7b: Run code analysis if requested.
 	if a.AnalyzeCode {
 		fmt.Fprintf(os.Stderr, "  Analyzing source code...\n")
-		signals, codeErr := code.RunCodeAnalysis(absFrom, goparser.NewGoParser())
+		signals, codeErr := code.RunCodeAnalysis(absFrom,
+			goparser.NewGoParser(),
+			pyparser.NewPythonParser(),
+			jsparser.NewJSParser(),
+		)
 		if codeErr != nil {
 			fmt.Fprintf(os.Stderr, "  Warning: code analysis failed: %v\n", codeErr)
 		} else {

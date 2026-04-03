@@ -1,9 +1,11 @@
 package code
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"golang.org/x/mod/modfile"
@@ -73,6 +75,13 @@ var skipDirs = map[string]bool{
 	"vendor":       true,
 	"node_modules": true,
 	".git":         true,
+	"__tests__":    true,
+	"__pycache__":  true,
+	".venv":        true,
+	"venv":         true,
+	".tox":         true,
+	"dist":         true,
+	"build":        true,
 }
 
 // AnalyzeDir walks a directory tree, analyzing each file with a registered parser.
@@ -122,8 +131,16 @@ func (a *CodeAnalyzer) AnalyzeDir(dir string) ([]CodeSignal, error) {
 	return allSignals, nil
 }
 
-// InferSourceComponent walks up from dir to find a go.mod file and extracts
-// the module path. Falls back to filepath.Base(dir) if no go.mod is found.
+// pyprojectNameRe matches the name field in pyproject.toml [project] section.
+var pyprojectNameRe = regexp.MustCompile(`(?m)^name\s*=\s*"([^"]+)"`)
+
+// setupPyNameRe matches the name argument in setup.py.
+var setupPyNameRe = regexp.MustCompile(`name\s*=\s*["']([^"']+)["']`)
+
+// InferSourceComponent walks up from dir to find a project manifest and extracts
+// the project name. Checks go.mod, pyproject.toml, setup.py, and package.json
+// in order at each directory level. Falls back to filepath.Base(dir) if no
+// manifest is found.
 func InferSourceComponent(dir string) string {
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -132,12 +149,34 @@ func InferSourceComponent(dir string) string {
 
 	current := absDir
 	for {
-		modPath := filepath.Join(current, "go.mod")
-		data, err := os.ReadFile(modPath)
-		if err == nil {
-			modulePath := modfile.ModulePath(data)
-			if modulePath != "" {
+		// Check go.mod
+		if data, err := os.ReadFile(filepath.Join(current, "go.mod")); err == nil {
+			if modulePath := modfile.ModulePath(data); modulePath != "" {
 				return modulePath
+			}
+		}
+
+		// Check pyproject.toml
+		if data, err := os.ReadFile(filepath.Join(current, "pyproject.toml")); err == nil {
+			if m := pyprojectNameRe.FindSubmatch(data); len(m) > 1 {
+				return string(m[1])
+			}
+		}
+
+		// Check setup.py
+		if data, err := os.ReadFile(filepath.Join(current, "setup.py")); err == nil {
+			if m := setupPyNameRe.FindSubmatch(data); len(m) > 1 {
+				return string(m[1])
+			}
+		}
+
+		// Check package.json
+		if data, err := os.ReadFile(filepath.Join(current, "package.json")); err == nil {
+			var pkg struct {
+				Name string `json:"name"`
+			}
+			if json.Unmarshal(data, &pkg) == nil && pkg.Name != "" {
+				return pkg.Name
 			}
 		}
 
