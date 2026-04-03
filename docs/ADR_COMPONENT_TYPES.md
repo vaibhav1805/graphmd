@@ -192,8 +192,8 @@ This taxonomy is:
 - [x] Confidence scoring integrated (3-tier model)
 - [x] SQLite schema extended (`component_type` column)
 - [x] CLI command `graphmd list --type` implemented
-- [x] Seed config framework designed (to be implemented in Phase 2)
-- [ ] Tag support (to be implemented in Phase 2)
+- [x] Seed config framework designed
+- [ ] Tag support (planned)
 - [ ] User documentation (this document + COMPONENT_TYPES.md, CLI_REFERENCE.md)
 
 ---

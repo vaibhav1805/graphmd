@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Phase 23 audit: all fields verified against .continue-here.md spec. No schema changes needed.
+// All fields verified against spec. No schema changes needed.
 // ManifestRelationship: source/target/type/confidence/signals/reviewed/status/user_notes — all present.
 // ManifestSignal: type/value/evidence — all present.
 // ManifestSummary.Pending computed as Total - Reviewed (Accepted + Rejected).

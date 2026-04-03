@@ -182,7 +182,7 @@ func SearchAllDocumentsPageIndex(dir, query string, limit int) ([]SearchResult, 
 // SearchAllDocuments loads the BM25 index from rootPath (building it if missing)
 // and executes a full-text search across all indexed markdown files.
 //
-// It reuses the existing openOrBuildIndex infrastructure from Phase 6.
+// It reuses the existing openOrBuildIndex infrastructure.
 // Returns SearchResult slice sorted by BM25 score descending.
 // Returns an empty slice (not nil) when no documents match.
 func SearchAllDocuments(rootPath, query string, topK int) ([]SearchResult, error) {

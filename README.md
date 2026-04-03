@@ -210,8 +210,7 @@ graphmd/
 ├── internal/
 │   └── knowledge/            # Core detection and graph pipeline
 ├── docs/                     # User-facing documentation
-├── test-data/                # Test corpus for validation
-└── .planning/                # Internal development planning
+└── test-data/                # Test corpus for validation
 ```
 
 ## How It Works
@@ -318,7 +317,7 @@ Load via: `graphmd index --dir ./docs --seed-config ./custom_types.yaml`
 
 ## Contributing
 
-graphmd welcomes contributions. Please see `.planning/CLAUDE.md` for development guidance.
+graphmd welcomes contributions. Please see `CLAUDE.md` for development guidance.
 
 ## License
 

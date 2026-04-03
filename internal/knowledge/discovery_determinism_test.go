@@ -22,7 +22,7 @@ func canonicalizeEdges(edges []*DiscoveredEdge) string {
 
 // TestDiscoveryDeterministic_10Runs verifies that DiscoverAndIntegrateRelationships
 // produces byte-for-byte identical edge sets across 10 consecutive calls on identical input.
-// This is a property test for the fix applied in Phase 24 plans 01-02.
+// This is a property test for the determinism fix.
 func TestDiscoveryDeterministic_10Runs(t *testing.T) {
 	docs := buildOrchTestDocs() // 3-doc synthetic corpus with cross-references
 

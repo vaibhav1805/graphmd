@@ -282,7 +282,7 @@ CREATE TABLE component_mentions (
 
 ## graphmd export — Export Dependency Graph
 
-Export the indexed graph to SQLite or other formats (preview for Phase 3).
+Export the indexed graph to SQLite or other formats.
 
 ### Syntax
 

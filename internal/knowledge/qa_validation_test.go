@@ -362,7 +362,7 @@ func TestQA_TagApplicationAndFiltering(t *testing.T) {
 	components := detector.DetectComponents(g, nil)
 
 	// For this QA test, we're validating the detection pipeline includes
-	// tag support (which will be implemented in Phase 2).
+	// tag support.
 	t.Logf("Tag filtering support report:")
 	t.Logf("  Components detected: %d", len(components))
 
@@ -371,10 +371,10 @@ func TestQA_TagApplicationAndFiltering(t *testing.T) {
 		if comp.Type == "" {
 			t.Errorf("component %q has empty type", comp.ID)
 		}
-		// Tags support will be validated in Phase 2 when seed config includes tags.
+		// Tags support will be validated when seed config includes tags.
 	}
 
-	t.Logf("✓ Tag application pipeline ready for Phase 2")
+	t.Logf("✓ Tag application pipeline ready")
 }
 
 // TestQA_ConfidenceScoreDistribution validates that confidence distribution
