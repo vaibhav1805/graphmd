@@ -1,1 +1,11 @@
+# Build artifacts
+graphmd
+*.exe
+
+# Local data
+.bmd/
+test-data/
+*.zip
+
+# Internal development planning
 .planning/

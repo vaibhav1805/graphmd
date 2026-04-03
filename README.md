@@ -1,53 +1,65 @@
 # graphmd
 
-A dependency graph analyzer for infrastructure documentation. Query component relationships and answer critical questions like "if this fails, what breaks?" without feeding entire architecture to AI agents.
+A dependency graph analyzer for infrastructure documentation and source code. Query component relationships and answer critical questions like "if this fails, what breaks?" without feeding entire architecture to AI agents.
 
 ## What Is graphmd?
 
-graphmd scans your infrastructure documentation (markdown files), automatically detects components, classifies them by type, and builds a queryable dependency graph. This enables AI agents and operators to:
+graphmd scans your infrastructure documentation (markdown files) and source code (Go, Python, JavaScript), automatically detects components, classifies them by type, and builds a queryable dependency graph. This enables AI agents and operators to:
 
-- **Query by component type:** "Find all databases" or "List all critical services"
-- **Analyze dependencies:** "What services depend on postgres-primary?"
-- **Assess impact:** "If this cache fails, which services are affected?"
-- **Audit infrastructure:** "Count components by type, show confidence scores"
+- **Query impact:** "If this database fails, which services break?"
+- **Trace dependencies:** "What does payment-api depend on?"
+- **Find paths:** "How does the web frontend connect to the primary database?"
+- **List components:** "Show all services with confidence above 0.7"
+- **Analyze code:** Detect infrastructure dependencies from connection strings, SDK calls, and imports
 
 Instead of feeding AI agents your entire architecture, they query the pre-computed graph — faster, cheaper, and more reliable.
 
 ## Features
 
+### Dual-Signal Detection
+
+graphmd merges signals from two sources into a single hybrid dependency graph:
+
+- **Markdown analysis:** Extracts components and relationships from infrastructure documentation
+- **Code analysis:** Detects database connections, service URLs, message queue bindings, and cache clients from Go, Python, and JavaScript source code
+
+When both sources corroborate a relationship, the edge is tagged `source_type: both`, giving higher confidence.
+
 ### Component Classification
 
-Every component carries a type classification, enabling targeted queries:
+Every component carries a type classification (one of 12 core types: `service`, `database`, `cache`, `queue`, `message-broker`, `load-balancer`, `gateway`, `storage`, `container-registry`, `config-server`, `monitoring`, `log-aggregator`) with a confidence score (0.4--1.0) reflecting detection reliability.
+
+See [docs/COMPONENT_TYPES.md](docs/COMPONENT_TYPES.md) for the complete type reference.
+
+### Structured Query Interface
+
+Four query commands cover common dependency analysis needs:
 
 ```bash
+# What breaks if primary-db fails?
+graphmd query impact --component primary-db --depth all
+
+# What does payment-api depend on?
+graphmd query dependencies --component payment-api
+
+# How does web-frontend connect to primary-db?
+graphmd query path --from web-frontend --to primary-db
+
 # List all services
-graphmd list --type service
-
-# List all databases
-graphmd list --type database --output json
-
-# Find all critical components
-graphmd list --output json | jq '.components[] | select(.tags[]? | contains("critical"))'
+graphmd query list --type service --min-confidence 0.7
 ```
 
-Components are classified into 12 core types: `service`, `database`, `cache`, `queue`, `message-broker`, `load-balancer`, `gateway`, `storage`, `container-registry`, `config-server`, `monitoring`, `log-aggregator`.
+All queries return structured JSON with confidence tiers, detection provenance, and graph metadata. See [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md) for the full command reference.
 
-See [docs/COMPONENT_TYPES.md](docs/COMPONENT_TYPES.md) for complete type reference.
+### MCP Server for LLM Agents
 
-### Confidence-Aware Detection
+graphmd includes a built-in MCP (Model Context Protocol) server, allowing LLM agents to query the dependency graph directly via tool calls:
 
-Each component carries a confidence score (0.4–1.0) reflecting detection reliability. Higher confidence indicates stronger evidence:
-
-```json
-{
-  "name": "postgres-primary",
-  "type": "database",
-  "confidence": 0.98,
-  "tags": ["critical", "ha"]
-}
+```bash
+graphmd mcp
 ```
 
-AI agents can filter by confidence threshold for risk-aware decisions.
+The server exposes five tools over stdio transport: `query_impact`, `query_dependencies`, `query_path`, `list_components`, and `graphmd_graph_info`. Configure it in your MCP client (e.g., Claude Desktop) to give agents on-demand access to your infrastructure graph.
 
 ### Extensible Type System
 
@@ -61,145 +73,105 @@ seed_mappings:
     tags: ["internal-only"]
 ```
 
-See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for customization guide.
-
-### Dependency Graph Queries
-
-Export the indexed graph to SQLite for direct queries:
-
-```bash
-# Index your documentation
-graphmd index --dir ./docs
-
-# Query components by type
-sqlite3 .bmd/knowledge.db "SELECT * FROM graph_nodes WHERE component_type = 'database';"
-
-# Find relationships
-sqlite3 .bmd/knowledge.db "SELECT * FROM graph_edges WHERE source_type = 'service' AND target_type = 'database';"
-```
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for customization options.
 
 ## Quick Start
 
 ### Prerequisites
 
 - Go 1.21+
-- Your infrastructure documented in markdown (in any directory)
+- Infrastructure documented in markdown and/or source code in Go, Python, or JavaScript
 
 ### Installation
 
 ```bash
-# Clone and build
 git clone https://github.com/your-org/graphmd
 cd graphmd
 go build -o graphmd ./cmd/graphmd
 ```
 
-### Index Your Documentation
+### Export a Graph
+
+The `export` command scans documentation and (optionally) source code, builds the dependency graph, and packages it as a portable ZIP archive:
 
 ```bash
-# Scan documentation directory and detect components
-./graphmd index --dir ./docs
+# Export from documentation only
+graphmd export --input ./docs --output graph.zip
 
-# Or with seed config for custom types
-./graphmd index --dir ./docs --seed-config ./custom_types.yaml
+# Export with code analysis enabled
+graphmd export --input ./project --output graph.zip --analyze-code
 ```
 
-The index command creates `.bmd/knowledge.db` containing the indexed graph.
+### Import and Query
 
-### Query Components by Type
+Import the exported graph into persistent storage, then query it:
 
 ```bash
-# List all services (table output)
-./graphmd list --type service --dir ./docs
+# Import the graph
+graphmd import graph.zip --name prod-infra
 
-# List services as JSON (for AI agents)
-./graphmd list --type service --output json --dir ./docs
+# Query impact
+graphmd query impact --component primary-db --depth all
 
-# Output:
-# {
-#   "components": [
-#     {
-#       "name": "api-gateway",
-#       "type": "gateway",
-#       "confidence": 0.95,
-#       "tags": ["critical", "internal"]
-#     },
-#     {
-#       "name": "order-service",
-#       "type": "service",
-#       "confidence": 0.88,
-#       "tags": []
-#     }
-#   ],
-#   "filter": {
-#     "query": "--type service",
-#     "primary_matches": 1,
-#     "tag_matches": 0
-#   }
-# }
+# List all databases
+graphmd query list --type database
+
+# Find path between components
+graphmd query path --from web-frontend --to primary-db
 ```
 
-See [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md) for complete command reference.
+### Crawl (Pre-Export Diagnostic)
+
+Use `crawl` to preview graph statistics before exporting:
+
+```bash
+graphmd crawl --input ./docs --format json
+graphmd crawl --input ./project --analyze-code --format json
+```
 
 ## Common Workflows
 
-### Find All Databases and Their Dependents
+### Assess Blast Radius of a Failure
 
 ```bash
-# Step 1: Index documentation
-graphmd index --dir ./docs
-
-# Step 2: List all databases
-sqlite3 .bmd/knowledge.db "
-  SELECT name, confidence FROM graph_nodes
-  WHERE component_type = 'database'
-  ORDER BY confidence DESC;
-"
-
-# Step 3: Find services that depend on each database
-sqlite3 .bmd/knowledge.db "
-  SELECT source.name as 'service', target.name as 'database'
-  FROM graph_edges
-  JOIN graph_nodes source ON graph_edges.source = source.id
-  JOIN graph_nodes target ON graph_edges.target = target.id
-  WHERE target.component_type = 'database'
-  AND source.component_type = 'service';
-"
+graphmd query impact --component primary-db --depth all --format json
 ```
 
-### Audit Critical Infrastructure
+Returns all transitively affected components with distance, confidence tiers, and relationship details.
+
+### Filter by Detection Source
 
 ```bash
-# Find all components tagged as critical
-./graphmd list --output json --dir ./docs | jq '.components[] | select(.tags[]? | contains("critical"))'
+# Only relationships detected from source code
+graphmd query dependencies --component payment-api --source-type code
 
-# Count critical components by type
-./graphmd list --output json --dir ./docs | \
-  jq '.components[] | select(.tags[]? | contains("critical")) | .type' | \
-  sort | uniq -c
+# Only relationships corroborated by both markdown and code
+graphmd query impact --component redis-cache --source-type both
 ```
 
-### Validate Seed Config Application
+### Include Detection Provenance
 
 ```bash
-# Index with seed config
-graphmd index --dir ./docs --seed-config ./custom_types.yaml
-
-# Check that seed config was applied (confidence 1.0 = seed-configured)
-sqlite3 .bmd/knowledge.db "
-  SELECT name, component_type, confidence
-  FROM graph_nodes
-  WHERE confidence = 1.0
-  ORDER BY name;
-"
+graphmd query impact --component primary-db --include-provenance --max-mentions 3
 ```
+
+Each affected node includes where and how it was detected (file path, detection method, confidence).
+
+### Use with AI Agents via MCP
+
+```bash
+# Start MCP server (stdio transport)
+graphmd mcp
+```
+
+Agents can call `query_impact`, `query_dependencies`, `query_path`, `list_components`, and `graphmd_graph_info` as MCP tools.
 
 ## Documentation
 
 - **[docs/COMPONENT_TYPES.md](docs/COMPONENT_TYPES.md)** — Complete reference for all 12 component types, detection patterns, and confidence scoring
-- **[docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md)** — Command reference for `graphmd list`, `graphmd index`, `graphmd export`, with examples and JSON output formats
-- **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** — Guide to customizing types via seed configuration; examples and best practices
-- **[docs/ADR_COMPONENT_TYPES.md](docs/ADR_COMPONENT_TYPES.md)** — Architecture decision record explaining design choices (why 12 types, confidence scores, extensibility)
+- **[docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md)** — Full command reference for all graphmd commands with examples and JSON output formats
+- **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** — Guide to `.graphmdignore`, `graphmd-aliases.yaml`, seed configuration, and named graph management
+- **[docs/ADR_COMPONENT_TYPES.md](docs/ADR_COMPONENT_TYPES.md)** — Architecture decision record explaining design choices
 
 ## Project Structure
 
@@ -208,7 +180,14 @@ graphmd/
 ├── cmd/
 │   └── graphmd/              # CLI entry point
 ├── internal/
-│   └── knowledge/            # Core detection and graph pipeline
+│   ├── knowledge/            # Core detection, graph, query, export/import pipeline
+│   ├── code/                 # Source code analysis (Go, Python, JS parsers)
+│   │   ├── goparser/         # Go source parser
+│   │   ├── pyparser/         # Python source parser
+│   │   ├── jsparser/         # JavaScript source parser
+│   │   ├── connstring/       # Connection string detection
+│   │   └── comments/         # Structured comment extraction
+│   └── mcp/                  # MCP server for LLM agent access
 ├── docs/                     # User-facing documentation
 └── test-data/                # Test corpus for validation
 ```
@@ -217,63 +196,42 @@ graphmd/
 
 ### 1. Scanning
 
-`graphmd index` scans your markdown documentation and extracts:
-- File paths and headings (component names)
-- Keywords and context (type detection signals)
-- Relationships between components
+graphmd scans markdown documentation and extracts file paths, headings (component names), keywords (type detection signals), and relationships between components.
 
-### 2. Component Type Detection
+### 2. Code Analysis (Optional)
 
-For each detected component, graphmd applies multiple detection algorithms:
-- **Naming patterns:** Does the name contain "postgres", "redis", "service"?
-- **File paths:** Is it in `services/`, `databases/`, `monitoring/`?
-- **Keywords:** Does the documentation mention type-specific keywords?
+When `--analyze-code` is enabled, graphmd also parses Go, Python, and JavaScript source files to detect:
+- Database connection strings (PostgreSQL, MySQL, Redis, MongoDB)
+- HTTP client URLs and service calls
+- Message queue bindings (RabbitMQ, Kafka, SQS)
+- SDK client instantiations (AWS, GCP, etc.)
 
-Result: `(name, type, confidence, detection_methods)`
+### 3. Component Type Detection
 
-### 3. Confidence Scoring
+For each detected component, graphmd applies multiple detection algorithms — naming patterns, file paths, keywords, and code signals — producing `(name, type, confidence, detection_methods)`.
 
-Each detection contributes evidence. Confidence ranges [0.4, 1.0]:
-- **0.95–1.0:** Very high (explicit naming)
-- **0.80–0.94:** High (clear but not explicit)
-- **0.65–0.79:** Moderate (some ambiguity)
-- **0.40–0.64:** Low (weak signal)
+### 4. Signal Merging
 
-Components with confidence below 0.65 default to `unknown`.
+Markdown-derived and code-derived edges are merged. When both sources find the same relationship, the edge is promoted to `source_type: both` with boosted confidence.
 
-### 4. Persistence
+### 5. Packaging
 
-The indexed graph is persisted to SQLite (`.bmd/knowledge.db`) with tables:
-- `graph_nodes`: Components with type, confidence, tags
-- `graph_edges`: Relationships between components
-- `component_mentions`: Provenance (where was each component detected?)
+The `export` command packages the graph as a ZIP archive containing `graph.db` (SQLite) and `metadata.json`. This archive is portable and versioned.
 
-### 5. Querying
+### 6. Querying
 
-Query the indexed graph via:
-- **CLI:** `graphmd list --type TYPE`
-- **SQL:** Direct SQLite queries for complex analysis
-- **JSON export:** Machine-readable output for AI agents
+After importing a graph, query it via the CLI (`graphmd query`) or MCP server (`graphmd mcp`). All output is structured JSON designed for machine consumption.
 
 ## Design Philosophy
 
 **AI agents should query pre-computed graphs, not entire architectures.**
-
-Why?
 
 1. **Efficiency:** Agents get answers in milliseconds, not seconds
 2. **Cost:** Fewer tokens in prompts means cheaper inference
 3. **Reliability:** Pre-computed graphs are more reliable than heuristic parsing
 4. **Compliance:** Structured queries avoid exposing sensitive data
 
-graphmd enables this by:
-- Automatically detecting components from your existing documentation
-- Computing a queryable dependency graph upfront
-- Exposing the graph via simple, machine-friendly APIs
-
 ## Testing
-
-Test corpus in `test-data/` contains diverse component examples:
 
 ```bash
 # Run all tests
@@ -281,39 +239,13 @@ go test ./...
 
 # Run with coverage
 go test -cover ./...
-
-# Run specific test
-go test -run TestComponentDetection ./...
 ```
 
 Coverage target: >85% for core packages.
 
 ## Configuration
 
-See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for full customization options.
-
-### Example: Custom Types for Your Organization
-
-```yaml
-# custom_types.yaml
-seed_mappings:
-  # Define custom types
-  - pattern: "ml-platform/*"
-    type: "ml-service"
-    tags: ["ai", "experimental"]
-
-  # Override misclassifications
-  - pattern: "helper-service"
-    type: "cache"
-    tags: ["utility"]
-
-  # Add tags to auto-detected components
-  - pattern: "prod-*"
-    type: "service"
-    tags: ["production", "critical"]
-```
-
-Load via: `graphmd index --dir ./docs --seed-config ./custom_types.yaml`
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for full customization options including `.graphmdignore`, `graphmd-aliases.yaml`, seed config, and named graph management.
 
 ## Contributing
 
@@ -325,4 +257,4 @@ graphmd welcomes contributions. Please see `CLAUDE.md` for development guidance.
 
 ---
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-04-03
