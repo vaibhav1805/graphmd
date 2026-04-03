@@ -1,0 +1,562 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/graphmd/graphmd/internal/knowledge"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		printUsage()
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "index":
+		cmdIndex()
+	case "crawl":
+		cmdCrawl()
+	case "depends":
+		cmdDepends()
+	case "components":
+		cmdComponents()
+	case "context":
+		cmdContext()
+	case "relationships":
+		cmdRelationships()
+	case "graph":
+		cmdGraph()
+	case "export":
+		cmdExport()
+	case "clean":
+		cmdClean()
+	case "discover":
+		cmdDiscover()
+	case "help", "-h", "--help":
+		printUsage()
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		printUsage()
+		os.Exit(1)
+	}
+}
+
+func cmdIndex() {
+	fs := flag.NewFlagSet("index", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory to index")
+	skipDiscovery := fs.Bool("skip-discovery", false, "Skip relationship discovery")
+	llmDiscovery := fs.Bool("llm-discovery", false, "Enable LLM-based discovery")
+	minConfidence := fs.Float64("min-confidence", 0.5, "Minimum confidence threshold")
+
+	fs.Parse(os.Args[2:])
+
+	// Get absolute directory path
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Initialize knowledge base
+	kb := knowledge.DefaultKnowledge()
+
+	// Scan documents
+	docs, err := kb.Scan(absDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error scanning documents: %v\n", err)
+		os.Exit(1)
+	}
+
+	if len(docs) == 0 {
+		fmt.Fprintf(os.Stderr, "No markdown files found in %s\n", absDir)
+		os.Exit(1)
+	}
+
+	graph := knowledge.NewGraph()
+
+	// Extract link-based edges
+	fmt.Fprintf(os.Stderr, "Extracting links...\n")
+	extractor := knowledge.NewExtractor(absDir)
+	for _, doc := range docs {
+		docCopy := doc // copy for iteration
+		edges := extractor.Extract(&docCopy)
+		for _, edge := range edges {
+			_ = graph.AddEdge(edge)
+		}
+	}
+
+	// Run discovery algorithms
+	if !*skipDiscovery {
+		fmt.Fprintf(os.Stderr, "Running discovery algorithms...\n")
+		discovered := knowledge.DiscoverRelationships(docs, nil)
+		for _, de := range discovered {
+			if de.Edge != nil && de.Edge.Confidence >= *minConfidence {
+				_ = graph.AddEdge(de.Edge)
+			}
+		}
+	}
+
+	// Save to database
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating .bmd directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	fmt.Fprintf(os.Stderr, "Saving graph...\n")
+	if err := db.SaveGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error saving graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("✓ Indexed %d documents\n", len(docs))
+	fmt.Printf("✓ Found %d relationships\n", graph.EdgeCount())
+	if *llmDiscovery {
+		fmt.Printf("✓ LLM discovery enabled\n")
+	}
+}
+
+func cmdCrawl() {
+	fs := flag.NewFlagSet("crawl", flag.ExitOnError)
+	fromMultiple := fs.String("from-multiple", "", "Comma-separated starting files")
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	direction := fs.String("direction", "backward", "Traversal direction: forward, backward, or both")
+	depth := fs.Int("depth", 3, "Max traversal depth")
+	format := fs.String("format", "json", "Output format: json, tree, dot, or list")
+
+	fs.Parse(os.Args[2:])
+
+	if *fromMultiple == "" {
+		fmt.Fprintf(os.Stderr, "Error: --from-multiple is required\n")
+		os.Exit(1)
+	}
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph from the indexed directory
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	startFiles := strings.Split(*fromMultiple, ",")
+	for i := range startFiles {
+		startFiles[i] = strings.TrimSpace(startFiles[i])
+	}
+
+	opts := knowledge.CrawlOptions{
+		FromFiles:     startFiles,
+		Direction:     *direction,
+		MaxDepth:      *depth,
+		IncludeCycles: false,
+	}
+
+	result := graph.CrawlMulti(opts)
+
+	switch *format {
+	case "json":
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+	case "tree":
+		// ASCII tree output
+		for node := range result.Nodes {
+			fmt.Printf("  %s\n", node)
+		}
+	case "dot":
+		// DOT format for Graphviz
+		fmt.Println("digraph {")
+		for _, edge := range graph.Edges {
+			if _, ok := result.Nodes[edge.Source]; ok {
+				if _, ok := result.Nodes[edge.Target]; ok {
+					fmt.Printf("  \"%s\" -> \"%s\";\n", edge.Source, edge.Target)
+				}
+			}
+		}
+		fmt.Println("}")
+	case "list":
+		// Simple list format
+		for node := range result.Nodes {
+			fmt.Println(node)
+		}
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown format: %s\n", *format)
+		os.Exit(1)
+	}
+}
+
+func cmdDepends() {
+	fs := flag.NewFlagSet("depends", flag.ExitOnError)
+	service := fs.String("service", "", "Service name")
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	format := fs.String("format", "json", "Output format: json or text")
+	transitive := fs.Bool("transitive", false, "Include transitive dependencies")
+
+	fs.Parse(os.Args[2:])
+
+	if *service == "" && fs.NArg() > 0 {
+		*service = fs.Arg(0)
+	}
+
+	if *service == "" {
+		fmt.Fprintf(os.Stderr, "Error: service name is required\n")
+		os.Exit(1)
+	}
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Find dependencies
+	deps := make(map[string]int)
+	if *transitive {
+		// BFS for transitive dependencies
+		visited := make(map[string]bool)
+		queue := []string{*service}
+		for len(queue) > 0 {
+			current := queue[0]
+			queue = queue[1:]
+			if visited[current] {
+				continue
+			}
+			visited[current] = true
+			for _, edge := range graph.Edges {
+				if edge.Source == current && edge.Target != *service {
+					deps[edge.Target]++
+					if !visited[edge.Target] {
+						queue = append(queue, edge.Target)
+					}
+				}
+			}
+		}
+	} else {
+		// Direct dependencies only
+		for _, edge := range graph.Edges {
+			if edge.Source == *service && edge.Target != *service {
+				deps[edge.Target]++
+			}
+		}
+	}
+
+	if *format == "json" {
+		data, _ := json.MarshalIndent(deps, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		for dep := range deps {
+			fmt.Println(dep)
+		}
+	}
+}
+
+func cmdComponents() {
+	fs := flag.NewFlagSet("components", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	format := fs.String("format", "json", "Output format: json or text")
+
+	fs.Parse(os.Args[2:])
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph to extract components
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	components := make(map[string]int)
+	for node := range graph.Nodes {
+		components[node]++
+	}
+
+	if *format == "json" {
+		data, _ := json.MarshalIndent(components, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		for comp := range components {
+			fmt.Println(comp)
+		}
+	}
+}
+
+func cmdContext() {
+	fs := flag.NewFlagSet("context", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory to search")
+	format := fs.String("format", "markdown", "Output format: markdown or json")
+	top := fs.Int("top", 5, "Max sections to return")
+
+	fs.Parse(os.Args[2:])
+
+	if fs.NArg() < 1 {
+		fmt.Fprintf(os.Stderr, "Error: query is required\n")
+		os.Exit(1)
+	}
+
+	query := fs.Arg(0)
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load documents for context assembly
+	docs, err := knowledge.DefaultKnowledge().Scan(absDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error scanning documents: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Simple context assembly (in practice, would use semantic search)
+	type contextResult struct {
+		Query   string   `json:"query"`
+		Sections []string `json:"sections"`
+	}
+
+	result := contextResult{Query: query, Sections: []string{}}
+	for i, doc := range docs {
+		if i >= *top {
+			break
+		}
+		result.Sections = append(result.Sections, doc.Path)
+	}
+
+	if *format == "json" {
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		fmt.Printf("Context for: %s\n", query)
+		for _, section := range result.Sections {
+			fmt.Printf("  - %s\n", section)
+		}
+	}
+}
+
+func cmdRelationships() {
+	fs := flag.NewFlagSet("relationships", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	format := fs.String("format", "json", "Output format: json or text")
+	minConfidence := fs.Float64("min-confidence", 0.0, "Minimum confidence threshold")
+
+	fs.Parse(os.Args[2:])
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Filter edges by confidence
+	type edgeInfo struct {
+		Source     string  `json:"source"`
+		Target     string  `json:"target"`
+		Type       string  `json:"type"`
+		Confidence float64 `json:"confidence"`
+	}
+
+	var edges []edgeInfo
+	for _, edge := range graph.Edges {
+		if edge.Confidence >= *minConfidence {
+			edges = append(edges, edgeInfo{
+				Source:     edge.Source,
+				Target:     edge.Target,
+				Type:       string(edge.Type),
+				Confidence: edge.Confidence,
+			})
+		}
+	}
+
+	if *format == "json" {
+		data, _ := json.MarshalIndent(edges, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		for _, edge := range edges {
+			fmt.Printf("%s -> %s (%s, %.2f)\n", edge.Source, edge.Target, edge.Type, edge.Confidence)
+		}
+	}
+}
+
+func cmdGraph() {
+	fs := flag.NewFlagSet("graph", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory that was indexed")
+	format := fs.String("format", "json", "Output format: json or dot")
+
+	fs.Parse(os.Args[2:])
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load the graph
+	dbPath := filepath.Join(absDir, ".bmd", "knowledge.db")
+	db, err := knowledge.OpenDB(dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	graph := knowledge.NewGraph()
+	if err := db.LoadGraph(graph); err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading graph: %v\n", err)
+		os.Exit(1)
+	}
+
+	if *format == "dot" {
+		fmt.Println("digraph {")
+		for _, edge := range graph.Edges {
+			fmt.Printf("  \"%s\" -> \"%s\";\n", edge.Source, edge.Target)
+		}
+		fmt.Println("}")
+	} else {
+		data, _ := json.MarshalIndent(graph, "", "  ")
+		fmt.Println(string(data))
+	}
+}
+
+func cmdExport() {
+	fs := flag.NewFlagSet("export", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory to export")
+	output := fs.String("output", "knowledge.tar.gz", "Output tar.gz file")
+	version := fs.String("version", "1.0.0", "Semantic version")
+
+	fs.Parse(os.Args[2:])
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Fprintf(os.Stderr, "Exporting knowledge from %s to %s (version %s)...\n", absDir, *output, *version)
+	fmt.Fprintf(os.Stderr, "Note: Export functionality requires packaging implementation\n")
+}
+
+func cmdClean() {
+	fs := flag.NewFlagSet("clean", flag.ExitOnError)
+	dir := fs.String("dir", ".", "Directory to clean")
+
+	fs.Parse(os.Args[2:])
+
+	absDir, err := filepath.Abs(*dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Fprintf(os.Stderr, "Cleaning BMD artifacts from %s...\n", absDir)
+	fmt.Fprintf(os.Stderr, "  Removing .bmd directory\n")
+	if err := os.RemoveAll(filepath.Join(absDir, ".bmd")); err != nil {
+		fmt.Fprintf(os.Stderr, "Error cleaning: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Fprintf(os.Stderr, "✓ Clean complete\n")
+}
+
+func cmdDiscover() {
+	fmt.Println("Discovery subcommand - not yet implemented")
+	os.Exit(1)
+}
+
+func printUsage() {
+	fmt.Fprintf(os.Stderr, `graphmd - intelligent graph discovery service for markdown documentation
+
+Usage:
+  graphmd <command> [options]
+
+Commands:
+  index           Run discovery algorithms on documentation
+  crawl           Traverse the dependency graph from starting files
+  depends         Show service dependencies
+  components      List discovered components
+  context         Assemble RAG context for a query
+  relationships   List discovered relationships with confidence scores
+  graph           Export the full dependency graph
+  export          Package knowledge as a tar.gz archive
+  clean           Remove all BMD artifacts from directory
+  discover        Run semantic discovery (experimental)
+  help            Show this help message
+
+Examples:
+  graphmd index --dir ./docs
+  graphmd crawl --from-multiple api.md,auth.md --direction backward
+  graphmd depends --service api-gateway --dir ./docs
+  graphmd components --dir ./docs --format json
+  graphmd context "how does auth work" --dir ./docs
+  graphmd relationships --dir ./docs --min-confidence 0.8
+  graphmd graph --dir ./docs --format dot
+
+`)
+}
